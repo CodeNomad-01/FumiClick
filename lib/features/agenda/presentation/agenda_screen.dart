@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'agenda_controller.dart';
 
 class AgendaScreen extends StatelessWidget {
-  const AgendaScreen({Key? key}) : super(key: key);
+  const AgendaScreen({super.key});
 
   Widget _buildBubble(ChatMessage m) {
     final isBot = m.sender == Sender.bot;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../data/appointment_model.dart';
 import '../data/appointment_repository.dart';
 
 enum Sender { bot, user, system }
