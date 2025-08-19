@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1018982776876",
+    "project_id": "fumiclick-a49a2",
+    "storage_bucket": "fumiclick-a49a2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1018982776876:android:f3a1f9cb48b7f8d12fd189",
+        "android_client_info": {
+          "package_name": "com.example.fumi_click"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfNtyv5Ho3zZBfca3dxm7CwoOmBRmcBRU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
