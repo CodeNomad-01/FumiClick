@@ -1,87 +1,43 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'features/chatbot/data/chatbot_repository.dart';
-import 'features/chatbot/infrastructure/chatbot_controller.dart';
-import 'features/chatbot/presentation/chatbot_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fumi_click/features/auth/presentation/login_screen.dart';
+import 'package:fumi_click/features/auth/provider/auth_provider.dart';
+import 'package:fumi_click/features/home/home.dart';
+import 'package:fumi_click/features/profile/presentation/profile_screen.dart';
+import 'package:fumi_click/firebase_options.dart';
+import 'package:fumi_click/utils/material-theme/lib/theme.dart';
+import 'package:fumi_click/utils/material-theme/lib/util.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(const ProviderScope(child: MainApp()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MainApp extends ConsumerWidget {
+  const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final repo = AppointmentRepository();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brightness = View.of(context).platformDispatcher.platformBrightness;
+    final userAsyncValue = ref.watch(userAuthProvider);
 
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => AgendaController(repository: repo),
-        ),
-      ],
-      child: MaterialApp(
-        title: 'Fumi Click',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        ),
-        home: const Home(),
-      ),
-    );
-  }
-}
+    TextTheme textTheme = createTextTheme(context, "Inter", "Roboto Flex");
+    MaterialTheme theme = MaterialTheme(textTheme);
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Fumi Click',
+      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
 
-class Home extends StatelessWidget {
-  const Home({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Fumi Click'), centerTitle: true),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Bienvenido a Fumi Click',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.calendar_today),
-                label: const Text('Agendar fumigación (Chatbot)'),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const AgendaScreen()),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.list),
-                label: const Text('Ver citas reservadas'),
-                onPressed: () {
-                  final repo =
-                      Provider.of<AgendaController>(
-                        context,
-                        listen: false,
-                      ).repository;
-                  final booked = repo.getBookedAppointments();
-                  final snackText =
-                      booked.isEmpty
-                          ? 'No hay citas reservadas'
-                          : 'Citas reservadas: ${booked.length}';
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(snackText)));
-                },
-              ),
-            ],
-          ),
-        ),
+      home: userAsyncValue.when(
+        data: (user) {
+          return user == null
+              ? const LoginScreen()
+              : HomeScreen(pages: const [Placeholder(), ProfileScreen()]);
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error: $error')),
       ),
     );
   }

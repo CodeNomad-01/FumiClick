@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:fumi_click/features/auth/presentation/signup_screen.dart';
-import 'package:fumi_click/features/auth/presentation/widgets/login_form.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+import 'package:flutter/material.dart';
+import 'package:fumi_click/features/auth/presentation/widgets/signup_form.dart';
+
+class SignUpScreen extends StatelessWidget {
+  const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +20,14 @@ class LoginScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: colorScheme.onSurface),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -29,11 +37,9 @@ class LoginScreen extends StatelessWidget {
                 width: maxWidth,
                 padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(height: topSpacing),
+                    SizedBox(height: topSpacing * 0.5),
 
-                    // Logo con esquema de color adaptado
                     Container(
                       width: logoSize,
                       height: logoSize,
@@ -42,7 +48,7 @@ class LoginScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: colorScheme.shadow,
+                            color: colorScheme.shadow.withOpacity(0.1),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
@@ -58,7 +64,7 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(height: 32),
 
                     Text(
-                      "Fumi Click",
+                      "Únete a Fumi Click",
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             color: colorScheme.onSurface,
                             fontWeight: FontWeight.bold,
@@ -68,7 +74,7 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(height: 12),
 
                     Text(
-                      "Controla las plagas, a un solo clic",
+                      "Únete y protege tus espacios",
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -77,7 +83,7 @@ class LoginScreen extends StatelessWidget {
 
                     const SizedBox(height: 48),
 
-                    // Card para formulario de login siguiendo M3
+                    // Sign up form
                     Card(
                       color: colorScheme.surfaceContainerHigh,
                       elevation: 0,
@@ -86,41 +92,27 @@ class LoginScreen extends StatelessWidget {
                       ),
                       child: Padding(
                         padding: EdgeInsets.all(isTablet ? 32.0 : 24.0),
-                        child: const LoginForm(),
+                        child: const SignUpForm(),
                       ),
                     ),
 
                     const SizedBox(height: 24),
 
-                    // Botón de registro adaptado a M3
                     TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          PageRouteBuilder(
-                            pageBuilder: (context, animation, secondaryAnimation) =>
-                                const SignUpScreen(),
-                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                              final tween = Tween(begin: const Offset(1, 0), end: Offset.zero)
-                                  .chain(CurveTween(curve: Curves.easeInOutCubic));
-                              return SlideTransition(position: animation.drive(tween), child: child);
-                            },
-                            transitionDuration: const Duration(milliseconds: 350),
-                          ),
-                        );
-                      },
+                      onPressed: () => Navigator.of(context).pop(),
                       child: RichText(
                         text: TextSpan(
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                               ),
                           children: [
-                            const TextSpan(text: "¿No tienes cuenta? "),
+                            const TextSpan(text: "¿Ya tienes cuenta? "),
                             TextSpan(
-                              text: "Regístrate",
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              text: "Inicia sesión",
+                              style: TextStyle(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
