@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'features/agenda/data/appointment_repository.dart';
-import 'features/agenda/presentation/agenda_controller.dart';
-import 'features/agenda/presentation/agenda_screen.dart';
+import 'features/chatbot/data/chatbot_repository.dart';
+import 'features/chatbot/infrastructure/chatbot_controller.dart';
+import 'features/chatbot/presentation/chatbot_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +17,9 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AgendaController(repository: repo)),
+        ChangeNotifierProvider(
+          create: (_) => AgendaController(repository: repo),
+        ),
       ],
       child: MaterialApp(
         title: 'Fumi Click',
@@ -36,10 +38,7 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fumi Click'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Fumi Click'), centerTitle: true),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -65,14 +64,19 @@ class Home extends StatelessWidget {
                 icon: const Icon(Icons.list),
                 label: const Text('Ver citas reservadas'),
                 onPressed: () {
-                  final repo = Provider.of<AgendaController>(context, listen: false).repository;
+                  final repo =
+                      Provider.of<AgendaController>(
+                        context,
+                        listen: false,
+                      ).repository;
                   final booked = repo.getBookedAppointments();
-                  final snackText = booked.isEmpty
-                      ? 'No hay citas reservadas'
-                      : 'Citas reservadas: ${booked.length}';
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(snackText)),
-                  );
+                  final snackText =
+                      booked.isEmpty
+                          ? 'No hay citas reservadas'
+                          : 'Citas reservadas: ${booked.length}';
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(snackText)));
                 },
               ),
             ],

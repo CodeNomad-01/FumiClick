@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'appointment_model.dart';
+import 'chatbot_model.dart';
 
 /// Repositorio simple en memoria con protección contra double-booking.
 /// La comprobación y el agregado del turno se hacen *sin await* para que
@@ -54,5 +54,8 @@ class AppointmentRepository {
   List<Appointment> getBookedAppointments() => List.unmodifiable(_booked);
 
   static bool isSameSlot(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day && a.hour == b.hour;
+      a.year == b.year &&
+      a.month == b.month &&
+      a.day == b.day &&
+      a.hour == b.hour;
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../data/appointment_model.dart';
-import '../data/appointment_repository.dart';
+import '../data/chatbot_model.dart';
+import '../data/chatbot_repository.dart';
 
 enum Sender { bot, user, system }
 
