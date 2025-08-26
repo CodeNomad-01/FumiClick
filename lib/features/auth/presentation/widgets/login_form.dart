@@ -38,7 +38,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                   color: colorScheme.onSurfaceVariant,
                 ),
                 hintStyle: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,
@@ -64,7 +64,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                   color: colorScheme.onSurfaceVariant,
                 ),
                 hintStyle: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,
@@ -89,10 +89,9 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               ),
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  ref.read(authNotifierProvider.notifier).login(
-                        _emailController.text,
-                        _passwordController.text,
-                      );
+                  ref
+                      .read(authNotifierProvider.notifier)
+                      .login(_emailController.text, _passwordController.text);
                 }
               },
               child: Text(

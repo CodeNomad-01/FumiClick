@@ -43,7 +43,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   color: colorScheme.onSurfaceVariant,
                 ),
                 hintStyle: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,
@@ -68,7 +68,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   color: colorScheme.onSurfaceVariant,
                 ),
                 hintStyle: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,
@@ -94,7 +94,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   color: colorScheme.onSurfaceVariant,
                 ),
                 hintStyle: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,
@@ -123,7 +123,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   color: colorScheme.onSurfaceVariant,
                 ),
                 hintStyle: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16,

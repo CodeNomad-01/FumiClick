@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:fumi_click/features/auth/presentation/widgets/signup_form.dart';
 
@@ -25,7 +24,10 @@ class SignUpScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: colorScheme.onSurface),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: colorScheme.onSurface,
+          ),
         ),
       ),
       body: SafeArea(
@@ -48,7 +50,7 @@ class SignUpScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: colorScheme.shadow.withOpacity(0.1),
+                            color: colorScheme.shadow.withValues(alpha: 0.1),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
@@ -65,10 +67,12 @@ class SignUpScreen extends StatelessWidget {
 
                     Text(
                       "Únete a Fumi Click",
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
@@ -76,8 +80,8 @@ class SignUpScreen extends StatelessWidget {
                     Text(
                       "Únete y protege tus espacios",
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                       textAlign: TextAlign.center,
                     ),
 
@@ -102,9 +106,8 @@ class SignUpScreen extends StatelessWidget {
                       onPressed: () => Navigator.of(context).pop(),
                       child: RichText(
                         text: TextSpan(
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
                           children: [
                             const TextSpan(text: "¿Ya tienes cuenta? "),
                             TextSpan(

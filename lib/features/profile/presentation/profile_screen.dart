@@ -18,74 +18,74 @@ class ProfileScreen extends ConsumerWidget {
         return user == null
             ? const UserNotFound()
             : Scaffold(
-                backgroundColor: colorScheme.surface,
-                body: SafeArea(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(
-                          radius: 80,
-                          // Reemplazo de surfaceVariant -> surfaceContainerHigh
-                          backgroundColor: colorScheme.surfaceContainerHigh,
-                          child: Icon(
-                            Icons.person,
-                            size: 100,
-                            // Reemplazo de onSurfaceVariant -> onSurface
-                            color: colorScheme.onSurface,
+              backgroundColor: colorScheme.surface,
+              body: SafeArea(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircleAvatar(
+                        radius: 80,
+                        // Reemplazo de surfaceVariant -> surfaceContainerHigh
+                        backgroundColor: colorScheme.surfaceContainerHigh,
+                        child: Icon(
+                          Icons.person,
+                          size: 100,
+                          // Reemplazo de onSurfaceVariant -> onSurface
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      Text(
+                        user.email ?? '',
+                        style: TextStyle(
+                          fontSize: 16,
+                          // onSurface con ligera atenuación para texto secundario
+                          color: colorScheme.onSurface.withValues(alpha: 0.80),
+                        ),
+                      ),
+
+                      const SizedBox(height: 40),
+
+                      // Material 3: FilledButton en lugar de ElevatedButton
+                      FilledButton(
+                        onPressed: () {
+                          ref.read(authNotifierProvider.notifier).logout();
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: colorScheme.primary,
+                          foregroundColor: colorScheme.onPrimary,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 40,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-
-                        const SizedBox(height: 20),
-
-                        Text(
-                          user.email ?? '',
-                          style: TextStyle(
-                            fontSize: 16,
-                            // onSurface con ligera atenuación para texto secundario
-                            color: colorScheme.onSurface.withOpacity(0.80),
-                          ),
-                        ),
-
-                        const SizedBox(height: 40),
-
-                        // Material 3: FilledButton en lugar de ElevatedButton
-                        FilledButton(
-                          onPressed: () {
-                            ref.read(authNotifierProvider.notifier).logout();
-                          },
-                          style: FilledButton.styleFrom(
-                            backgroundColor: colorScheme.primary,
-                            foregroundColor: colorScheme.onPrimary,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 40,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text('Cerrar sesión'),
-                        ),
-                      ],
-                    ),
+                        child: const Text('Cerrar sesión'),
+                      ),
+                    ],
                   ),
                 ),
-              );
+              ),
+            );
       },
-      error: (error, stack) => Center(
-        child: Text(
-          'Error: $error',
-          style: TextStyle(color: colorScheme.error),
-        ),
-      ),
-      loading: () => Center(
-        child: CircularProgressIndicator(
-          color: colorScheme.primary,
-        ),
-      ),
+      error:
+          (error, stack) => Center(
+            child: Text(
+              'Error: $error',
+              style: TextStyle(color: colorScheme.error),
+            ),
+          ),
+      loading:
+          () => Center(
+            child: CircularProgressIndicator(color: colorScheme.primary),
+          ),
     );
   }
 }

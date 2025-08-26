@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../data/chatbot_model.dart';
 import '../data/chatbot_repository.dart';
 
 enum Sender { bot, user, system }
@@ -20,7 +19,7 @@ class AgendaController extends ChangeNotifier {
 
   // Todas las opciones obtenidas (slots) y paginado
   List<DateTime> _allOptions = [];
-  int _pageSize = 12;
+  final int _pageSize = 12;
   int _currentPage = 0;
 
   // --- getters públicos para que la UI calcule índices correctamente ---
@@ -47,6 +46,7 @@ class AgendaController extends ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
 
   AgendaController({required this.repository}) {
+    // Llamada asíncrona no bloqueante desde el constructor (arranca la conversación)
     startConversation();
   }
 
@@ -58,7 +58,7 @@ class AgendaController extends ChangeNotifier {
         text: 'Simulación: usuario iniciado sesión.',
       ),
     );
-    notifyListeners();
+    // no notifyListeners() aquí porque _addMessage ya lo hace
   }
 
   void simulateLogout() {
@@ -69,7 +69,7 @@ class AgendaController extends ChangeNotifier {
         text: 'Simulación: usuario cerrado sesión.',
       ),
     );
-    notifyListeners();
+    // no notifyListeners() aquí porque _addMessage ya lo hace
   }
 
   void _addMessage(ChatMessage m) {
@@ -147,7 +147,7 @@ class AgendaController extends ChangeNotifier {
   }
 
   /// El método que maneja la selección por número (1..N)
-  void userSelectOption(int optionIndex) async {
+  Future<void> userSelectOption(int optionIndex) async {
     // Si seleccionó una de las opciones de la página actual o la opción "mostrar más"
     final globalIndex = optionIndex - 1; // convertir a 0-index
     final maxIndex = _allOptions.length - 1;
@@ -219,8 +219,9 @@ class AgendaController extends ChangeNotifier {
       );
       // Ajustar currentPage si hace falta
       final totalPages = (_allOptions.length / _pageSize).ceil();
-      if (_currentPage >= totalPages && _currentPage > 0)
+      if (_currentPage >= totalPages && _currentPage > 0) {
         _currentPage = totalPages - 1;
+      }
       await Future.delayed(const Duration(milliseconds: 500));
       _addMessage(
         ChatMessage(sender: Sender.bot, text: '¿Necesitas otra cita?'),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fumi_click/features/auth/presentation/login_screen.dart';
 import 'package:fumi_click/features/auth/provider/auth_provider.dart';
+import 'package:fumi_click/features/chatbot/presentation/chatbot_screen.dart';
 import 'package:fumi_click/features/home/home.dart';
 import 'package:fumi_click/features/profile/presentation/profile_screen.dart';
 import 'package:fumi_click/firebase_options.dart';
@@ -34,7 +35,9 @@ class MainApp extends ConsumerWidget {
         data: (user) {
           return user == null
               ? const LoginScreen()
-              : HomeScreen(pages: const [Placeholder(), ProfileScreen()]);
+              : HomeScreen(
+                pages: const [Placeholder(), ChatbotScreen(), ProfileScreen()],
+              );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('Error: $error')),

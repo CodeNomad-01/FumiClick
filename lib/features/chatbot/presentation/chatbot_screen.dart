@@ -1,59 +1,133 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fumi_click/utils/material-theme/lib/util.dart';
 import '../infrastructure/chatbot_controller.dart';
+import '../data/chatbot_repository.dart';
 
-class AgendaScreen extends StatelessWidget {
-  const AgendaScreen({Key? key}) : super(key: key);
+final chatbotControllerProvider = ChangeNotifierProvider<AgendaController>((
+  ref,
+) {
+  return AgendaController(repository: AppointmentRepository());
+});
 
-  Widget _buildBubble(ChatMessage m) {
+class ChatbotScreen extends ConsumerWidget {
+  const ChatbotScreen({super.key});
+
+  Widget _buildBubble(
+    BuildContext context,
+    ChatMessage m,
+    TextTheme textTheme,
+  ) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final isBot = m.sender == Sender.bot;
-    final alignment = isBot ? CrossAxisAlignment.start : CrossAxisAlignment.end;
-    final color = isBot ? Colors.grey.shade200 : Colors.blue.shade200;
 
-    return Column(
-      crossAxisAlignment: alignment,
-      children: [
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(m.text),
-              if (m.options != null) const SizedBox(height: 8),
-              if (m.options != null)
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children:
-                      m.options!.asMap().entries.map((e) {
-                        final idx = e.key + 1;
-                        final txt = e.value;
-                        return Chip(label: Text(txt));
-                      }).toList(),
+    // Mejora de contraste: usamos tokens del colorScheme que garantizan legibilidad
+    final bubbleColor = isBot ? cs.surface : cs.primary;
+    final textColor = isBot ? cs.onSurface : cs.onPrimary;
+
+    // Limitar ancho para que las burbujas no ocupen toda la pantalla
+    final maxWidth = MediaQuery.of(context).size.width * 0.78;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      child: Row(
+        mainAxisAlignment:
+            isBot ? MainAxisAlignment.start : MainAxisAlignment.end,
+        children: [
+          // Burbuja con sombra ligera y radio más pronunciado
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: bubbleColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(14),
+                  topRight: const Radius.circular(14),
+                  bottomLeft: Radius.circular(isBot ? 4 : 14), // 'cola' sutil
+                  bottomRight: Radius.circular(isBot ? 14 : 4), // 'cola' sutil
                 ),
-            ],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Texto con tamaño cómodo y buen contraste
+                  Text(
+                    m.text,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: textColor,
+                      fontSize: 15,
+                    ),
+                  ),
+                  if (m.options != null) const SizedBox(height: 8),
+                  if (m.options != null)
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children:
+                          m.options!.asMap().entries.map((e) {
+                            final txt = e.value;
+                            return Chip(
+                              backgroundColor: cs.surfaceVariant,
+                              label: Text(
+                                txt,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: cs.onSurface,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Provider.of<AgendaController>(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Obtenemos el controller desde Riverpod
+    final controller = ref.watch(chatbotControllerProvider);
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    // Ajusta aquí los nombres de las fuentes si quieres otros
+    final textTheme = createTextTheme(context, 'Inter', 'Roboto');
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agenda de Fumigación'),
+        elevation: 1,
+        title: Text(
+          'Agenda de Fumigación',
+          style: textTheme.titleLarge?.copyWith(
+            color: cs.onPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: cs.primary,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Center(
-              child: Text(controller.isLoggedIn ? 'Sesión: ON' : 'Sesión: OFF'),
+              child: Text(
+                controller.isLoggedIn ? 'Sesión: ON' : 'Sesión: OFF',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: cs.onPrimary,
+                  fontSize: 13,
+                ),
+              ),
             ),
           ),
           IconButton(
@@ -61,7 +135,10 @@ class AgendaScreen extends StatelessWidget {
                 controller.isLoggedIn
                     ? 'Cerrar sesión (simulado)'
                     : 'Iniciar sesión (simulado)',
-            icon: Icon(controller.isLoggedIn ? Icons.logout : Icons.login),
+            icon: Icon(
+              controller.isLoggedIn ? Icons.logout : Icons.login,
+              color: cs.onPrimary,
+            ),
             onPressed: () {
               if (controller.isLoggedIn) {
                 controller.simulateLogout();
@@ -72,120 +149,166 @@ class AgendaScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.only(top: 12, bottom: 12),
-              itemCount: controller.messages.length,
-              itemBuilder: (context, i) {
-                final m = controller.messages[i];
-                // Si el mensaje tiene opciones, renderizamos con botones debajo
-                if (m.options != null && m.options!.isNotEmpty) {
-                  // Renderizamos las opciones como botones numerados
-                  final options = m.options!;
-                  // Para calcular los índices visibles necesitamos leer el texto (ya vienen numeradas globalmente)
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildBubble(m),
-                        const SizedBox(height: 6),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 6,
-                          children:
-                              options.asMap().entries.map((entry) {
-                                final localIdx =
-                                    entry
-                                        .key; // posición en este mensaje (0..n-1)
-                                final label = entry.value;
-                                // extraemos el número global del label si existe al principio "N) "
-                                // Para simplificar el comportamiento de los botones usaremos la posición visual:
-                                final displayNumber =
-                                    (() {
-                                      // Si el label comienza con "NN) " (opciones numeradas), parseamos ese número.
-                                      final match = RegExp(
-                                        r'^(\d+)\)',
-                                      ).firstMatch(label);
-                                      if (match != null)
-                                        return int.parse(match.group(1)!);
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.only(top: 12, bottom: 12),
+                itemCount: controller.messages.length,
+                itemBuilder: (context, i) {
+                  final m = controller.messages[i];
 
-                                      // Si no tiene número y es la opción "Mostrar más...", le asignamos
-                                      // el número global correcto: (startIndex + visibleCount + 1)
-                                      final lowerLabel = label.toLowerCase();
-                                      if (lowerLabel.contains('mostrar')) {
+                  // Si el mensaje tiene opciones, renderizamos con botones debajo
+                  if (m.options != null && m.options!.isNotEmpty) {
+                    final options = m.options!;
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildBubble(context, m, textTheme),
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children:
+                                options.asMap().entries.map((entry) {
+                                  final localIdx = entry.key;
+                                  final label = entry.value;
+
+                                  // Determinar número global de la opción (robusto)
+                                  final displayNumber =
+                                      (() {
+                                        final match = RegExp(
+                                          r'^(\d+)\)',
+                                        ).firstMatch(label);
+                                        if (match != null) {
+                                          return int.parse(match.group(1)!);
+                                        }
+
+                                        final lowerLabel = label.toLowerCase();
+                                        if (lowerLabel.contains('mostrar')) {
+                                          return controller
+                                                  .currentPageStartIndex +
+                                              controller.visibleOptionsCount +
+                                              1;
+                                        }
+
                                         return controller
                                                 .currentPageStartIndex +
-                                            controller.visibleOptionsCount +
+                                            localIdx +
                                             1;
-                                      }
+                                      })();
 
-                                      // Fallback: usar un número seguro (esto casi no ocurrirá)
-                                      return controller.currentPageStartIndex +
-                                          localIdx +
-                                          1;
-                                    })();
-                                // Botón habilitado solo cuando no esté cargando
-                                return ElevatedButton(
-                                  onPressed:
-                                      controller.loading
-                                          ? null
-                                          : () {
-                                            controller.userSelectOption(
-                                              displayNumber,
-                                            );
-                                          },
-                                  child: Text(
-                                    label.startsWith(RegExp(r'\d+\)'))
-                                        ? label.split(')')[0]
-                                        : label,
-                                  ),
-                                );
-                              }).toList(),
-                        ),
-                      ],
+                                  // Texto del botón: si el label tiene "N) ..." mostramos N, si no mostramos el label completo
+                                  final buttonText =
+                                      (RegExp(r'^\d+\)').hasMatch(label))
+                                          ? label.split(')')[0]
+                                          : label;
+
+                                  // Botones con tamaño y estilo legible
+                                  return SizedBox(
+                                    height: 40,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        elevation: 0,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                        ),
+                                        textStyle: textTheme.bodyMedium
+                                            ?.copyWith(fontSize: 14),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed:
+                                          controller.loading
+                                              ? null
+                                              : () {
+                                                controller.userSelectOption(
+                                                  displayNumber,
+                                                );
+                                              },
+                                      child: Text(
+                                        buttonText,
+                                        style: textTheme.labelLarge?.copyWith(
+                                          color: cs.onPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return _buildBubble(context, m, textTheme);
+                  }
+                },
+              ),
+            ),
+
+            // Indicador de carga: toma color del theme
+            if (controller.loading)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: LinearProgressIndicator(
+                  color: cs.primary,
+                  backgroundColor: cs.surfaceVariant,
+                ),
+              ),
+
+            // Barra inferior de acciones (sin cambios funcionales, sólo estilo)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      textStyle: textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  );
-                } else {
-                  return _buildBubble(m);
-                }
-              },
+                    onPressed:
+                        controller.loading
+                            ? null
+                            : () => controller.startConversation(),
+                    child: Text('Reiniciar', style: textTheme.labelLarge),
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      textStyle: textTheme.labelLarge,
+                    ),
+                    onPressed:
+                        controller.loading
+                            ? null
+                            : () => controller.clearConversation(),
+                    child: Text('Limpiar', style: textTheme.labelLarge),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'Reservadas: ${controller.repository.getBookedAppointments().length}',
+                    style: textTheme.bodySmall?.copyWith(color: cs.onSurface),
+                  ),
+                ],
+              ),
             ),
-          ),
-          if (controller.loading)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: LinearProgressIndicator(),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                ElevatedButton(
-                  onPressed:
-                      controller.loading
-                          ? null
-                          : () => controller.startConversation(),
-                  child: const Text('Reiniciar'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed:
-                      controller.loading
-                          ? null
-                          : () => controller.clearConversation(),
-                  child: const Text('Limpiar'),
-                ),
-                const Spacer(),
-                Text(
-                  'Reservadas: ${controller.repository.getBookedAppointments().length}',
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
