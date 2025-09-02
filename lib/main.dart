@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fumi_click/features/agenda/presentation/appointment_form_screen.dart';
 import 'package:fumi_click/features/auth/presentation/login_screen.dart';
 import 'package:fumi_click/features/auth/provider/auth_provider.dart';
 import 'package:fumi_click/features/chatbot/presentation/chatbot_screen.dart';
@@ -36,7 +37,7 @@ class MainApp extends ConsumerWidget {
           return user == null
               ? const LoginScreen()
               : HomeScreen(
-                pages: const [Placeholder(), ChatbotScreen(), ProfileScreen()],
+                pages: const [AppointmentFormScreen(), ChatbotScreen(), ProfileScreen()],
               );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
