@@ -4,7 +4,9 @@ import 'package:fumi_click/utils/material-theme/lib/util.dart';
 import '../infrastructure/chatbot_controller.dart';
 import '../data/chatbot_repository.dart';
 
-final chatbotControllerProvider = ChangeNotifierProvider<AgendaController>((ref) {
+final chatbotControllerProvider = ChangeNotifierProvider<AgendaController>((
+  ref,
+) {
   return AgendaController(repository: AppointmentRepository());
 });
 
@@ -59,28 +61,33 @@ class ChatbotScreen extends ConsumerWidget {
                 children: [
                   Text(
                     m.text,
-                    style: textTheme.bodyMedium
-                        ?.copyWith(color: textColor, fontSize: 15),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: textColor,
+                      fontSize: 15,
+                    ),
                   ),
                   if (m.options != null) const SizedBox(height: 8),
                   if (m.options != null)
                     Wrap(
                       spacing: 8,
                       runSpacing: 6,
-                      children: m.options!.asMap().entries.map((e) {
-                        final txt = e.value;
-                        return Chip(
-                          // ignore: deprecated_member_use
-                          backgroundColor: cs.surfaceVariant,
-                          label: Text(
-                            txt,
-                            style: textTheme.bodySmall
-                                ?.copyWith(color: cs.onSurface, fontSize: 13),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        );
-                      }).toList(),
+                      children:
+                          m.options!.asMap().entries.map((e) {
+                            final txt = e.value;
+                            return Chip(
+                              // ignore: deprecated_member_use
+                              backgroundColor: cs.surfaceVariant,
+                              label: Text(
+                                txt,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: cs.onSurface,
+                                  fontSize: 13,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }).toList(),
                     ),
                 ],
               ),
@@ -103,38 +110,13 @@ class ChatbotScreen extends ConsumerWidget {
         elevation: 1,
         title: Text(
           'Agenda de Fumigación',
-          style: textTheme.titleLarge
-              ?.copyWith(color: cs.onPrimary, fontWeight: FontWeight.w600),
+          style: textTheme.titleLarge?.copyWith(
+            color: cs.onPrimary,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         backgroundColor: cs.primary,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Center(
-              child: Text(
-                controller.isLoggedIn ? 'Sesión: ON' : 'Sesión: OFF',
-                style: textTheme.bodyMedium
-                    ?.copyWith(color: cs.onPrimary, fontSize: 13),
-              ),
-            ),
-          ),
-          IconButton(
-            tooltip: controller.isLoggedIn
-                ? 'Cerrar sesión (simulado)'
-                : 'Iniciar sesión (simulado)',
-            icon: Icon(
-              controller.isLoggedIn ? Icons.logout : Icons.login,
-              color: cs.onPrimary,
-            ),
-            onPressed: () {
-              if (controller.isLoggedIn) {
-                controller.simulateLogout();
-              } else {
-                controller.simulateLogin();
-              }
-            },
-          ),
-        ],
+        actions: const [],
       ),
       body: SafeArea(
         child: Column(
@@ -160,69 +142,81 @@ class ChatbotScreen extends ConsumerWidget {
                           Wrap(
                             spacing: 8,
                             runSpacing: 6,
-                            children: options.asMap().entries.map((entry) {
-                              final localIdx = entry.key;
-                              final label = entry.value.trim();
+                            children:
+                                options.asMap().entries.map((entry) {
+                                  final localIdx = entry.key;
+                                  final label = entry.value.trim();
 
-                              // Determinar número global de la opción (robusto)
-                              final displayNumber = (() {
-                                final match =
-                                    RegExp(r'^(\d+)\)').firstMatch(label);
-                                if (match != null) {
-                                  return int.parse(match.group(1)!);
-                                }
+                                  // Determinar número global de la opción (robusto)
+                                  final displayNumber =
+                                      (() {
+                                        final match = RegExp(
+                                          r'^(\d+)\)',
+                                        ).firstMatch(label);
+                                        if (match != null) {
+                                          return int.parse(match.group(1)!);
+                                        }
 
-                                final lowerLabel = label.toLowerCase();
-                                if (lowerLabel.contains('mostrar')) {
-                                  return controller.currentPageStartIndex +
-                                      controller.visibleOptionsCount +
-                                      1;
-                                }
+                                        final lowerLabel = label.toLowerCase();
+                                        if (lowerLabel.contains('mostrar')) {
+                                          return controller
+                                                  .currentPageStartIndex +
+                                              controller.visibleOptionsCount +
+                                              1;
+                                        }
 
-                                return controller.currentPageStartIndex +
-                                    localIdx +
-                                    1;
-                              })();
+                                        return controller
+                                                .currentPageStartIndex +
+                                            localIdx +
+                                            1;
+                                      })();
 
-                              // Mostrar la etiqueta completa (más legible), acortar visualmente si es muy larga
-                              final buttonText = label;
+                                  // Mostrar la etiqueta completa (más legible), acortar visualmente si es muy larga
+                                  final buttonText = label;
 
-                              // Botones legibles: contraste garantizado con tokens del theme
-                              return ConstrainedBox(
-                                constraints: const BoxConstraints(minWidth: 120),
-                                child: SizedBox(
-                                  height: 44,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: cs.primary,
-                                      foregroundColor: cs.onPrimary,
-                                      elevation: 0,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12),
-                                      textStyle: textTheme.bodyMedium
-                                          ?.copyWith(fontSize: 14),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
+                                  // Botones legibles: contraste garantizado con tokens del theme
+                                  return ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      minWidth: 120,
+                                    ),
+                                    child: SizedBox(
+                                      height: 44,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: cs.primary,
+                                          foregroundColor: cs.onPrimary,
+                                          elevation: 0,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                          ),
+                                          textStyle: textTheme.bodyMedium
+                                              ?.copyWith(fontSize: 14),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                        ),
+                                        onPressed:
+                                            controller.loading
+                                                ? null
+                                                : () {
+                                                  controller.userSelectOption(
+                                                    displayNumber,
+                                                  );
+                                                },
+                                        child: Text(
+                                          buttonText,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: textTheme.bodyMedium?.copyWith(
+                                            color: cs.onPrimary,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                    onPressed: controller.loading
-                                        ? null
-                                        : () {
-                                            controller.userSelectOption(
-                                              displayNumber,
-                                            );
-                                          },
-                                    child: Text(
-                                      buttonText,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: textTheme.bodyMedium
-                                          ?.copyWith(color: cs.onPrimary),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
+                                  );
+                                }).toList(),
                           ),
                         ],
                       ),
@@ -254,13 +248,17 @@ class ChatbotScreen extends ConsumerWidget {
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
-                      textStyle:
-                          textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      textStyle: textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    onPressed: controller.loading
-                        ? null
-                        : () => controller.startConversation(),
+                    onPressed:
+                        controller.loading
+                            ? null
+                            : () => controller.startConversation(),
                     child: Text('Reiniciar', style: textTheme.labelLarge),
                   ),
                   const SizedBox(width: 8),
@@ -268,11 +266,15 @@ class ChatbotScreen extends ConsumerWidget {
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: cs.outline),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       textStyle: textTheme.labelLarge,
                     ),
                     onPressed:
-                        controller.loading ? null : () => controller.clearConversation(),
+                        controller.loading
+                            ? null
+                            : () => controller.clearConversation(),
                     child: Text('Limpiar', style: textTheme.labelLarge),
                   ),
                   const Spacer(),

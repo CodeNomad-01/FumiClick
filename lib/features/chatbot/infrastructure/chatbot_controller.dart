@@ -41,8 +41,8 @@ class AgendaController extends ChangeNotifier {
   bool _loading = false;
   bool get loading => _loading;
 
-  // Simulación de login (para evitar reservar si no hay sesión)
-  bool _isLoggedIn = false;
+  // Usuario siempre considerado logeado
+  bool _isLoggedIn = true;
   bool get isLoggedIn => _isLoggedIn;
 
   AgendaController({required this.repository}) {
@@ -50,27 +50,9 @@ class AgendaController extends ChangeNotifier {
     startConversation();
   }
 
-  void simulateLogin() {
-    _isLoggedIn = true;
-    _addMessage(
-      ChatMessage(
-        sender: Sender.system,
-        text: 'Simulación: usuario iniciado sesión.',
-      ),
-    );
-    // no notifyListeners() aquí porque _addMessage ya lo hace
-  }
+  void simulateLogin() {}
 
-  void simulateLogout() {
-    _isLoggedIn = false;
-    _addMessage(
-      ChatMessage(
-        sender: Sender.system,
-        text: 'Simulación: usuario cerrado sesión.',
-      ),
-    );
-    // no notifyListeners() aquí porque _addMessage ya lo hace
-  }
+  void simulateLogout() {}
 
   void _addMessage(ChatMessage m) {
     _messages.add(m);
@@ -83,7 +65,7 @@ class AgendaController extends ChangeNotifier {
       ChatMessage(
         sender: Sender.bot,
         text:
-            '¡Hola! Soy el asistente de agendamiento de fumigaciones. Aquí puedes ver las franjas disponibles. Para reservar debes iniciar sesión.',
+            '¡Hola! Soy el asistente de agendamiento de fumigaciones. Aquí puedes ver las franjas disponibles y reservar tu cita.',
       ),
     );
     await Future.delayed(const Duration(milliseconds: 400));
@@ -183,18 +165,7 @@ class AgendaController extends ChangeNotifier {
     // Registrar el mensaje del usuario con el número que pulsó
     _addMessage(ChatMessage(sender: Sender.user, text: optionIndex.toString()));
 
-    // Si no está logeado, NO se reserva: mostramos mensaje informativo.
-    if (!_isLoggedIn) {
-      _addMessage(
-        ChatMessage(
-          sender: Sender.bot,
-          text:
-              'Para reservar necesitas iniciar sesión. Por ahora solo puedes consultar las franjas (cotización).',
-        ),
-      );
-      // (Opcional) podríamos dar la opción de simular login aquí, pero lo dejamos en la UI.
-      return;
-    }
+    // Usuario considerado logeado: procedemos a reservar directamente
 
     // Si está logeado, procedemos a reservar
     _addMessage(
