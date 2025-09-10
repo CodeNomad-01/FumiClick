@@ -56,40 +56,12 @@ class ChatbotScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    m.text,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: textColor,
-                      fontSize: 15,
-                    ),
-                  ),
-                  if (m.options != null) const SizedBox(height: 8),
-                  if (m.options != null)
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      children:
-                          m.options!.asMap().entries.map((e) {
-                            final txt = e.value;
-                            return Chip(
-                              // ignore: deprecated_member_use
-                              backgroundColor: cs.surfaceVariant,
-                              label: Text(
-                                txt,
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: cs.onSurface,
-                                  fontSize: 13,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            );
-                          }).toList(),
-                    ),
-                ],
+              child: Text(
+                m.text,
+                style: textTheme.bodyMedium?.copyWith(
+                  color: textColor,
+                  fontSize: 15,
+                ),
               ),
             ),
           ),
@@ -128,102 +100,8 @@ class ChatbotScreen extends ConsumerWidget {
                 itemBuilder: (context, i) {
                   final m = controller.messages[i];
 
-                  // Si el mensaje tiene opciones, renderizamos con botones debajo
-                  if (m.options != null && m.options!.isNotEmpty) {
-                    final options = m.options!;
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildBubble(context, m, textTheme),
-                          const SizedBox(height: 6),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 6,
-                            children:
-                                options.asMap().entries.map((entry) {
-                                  final localIdx = entry.key;
-                                  final label = entry.value.trim();
-
-                                  // Determinar número global de la opción (robusto)
-                                  final displayNumber =
-                                      (() {
-                                        final match = RegExp(
-                                          r'^(\d+)\)',
-                                        ).firstMatch(label);
-                                        if (match != null) {
-                                          return int.parse(match.group(1)!);
-                                        }
-
-                                        final lowerLabel = label.toLowerCase();
-                                        if (lowerLabel.contains('mostrar')) {
-                                          return controller
-                                                  .currentPageStartIndex +
-                                              controller.visibleOptionsCount +
-                                              1;
-                                        }
-
-                                        return controller
-                                                .currentPageStartIndex +
-                                            localIdx +
-                                            1;
-                                      })();
-
-                                  // Mostrar la etiqueta completa (más legible), acortar visualmente si es muy larga
-                                  final buttonText = label;
-
-                                  // Botones legibles: contraste garantizado con tokens del theme
-                                  return ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                      minWidth: 120,
-                                    ),
-                                    child: SizedBox(
-                                      height: 44,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: cs.primary,
-                                          foregroundColor: cs.onPrimary,
-                                          elevation: 0,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                          ),
-                                          textStyle: textTheme.bodyMedium
-                                              ?.copyWith(fontSize: 14),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                          ),
-                                        ),
-                                        onPressed:
-                                            controller.loading
-                                                ? null
-                                                : () {
-                                                  controller.userSelectOption(
-                                                    displayNumber,
-                                                  );
-                                                },
-                                        child: Text(
-                                          buttonText,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: textTheme.bodyMedium?.copyWith(
-                                            color: cs.onPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return _buildBubble(context, m, textTheme);
-                  }
+                  // Mostrar solo el mensaje sin botones
+                  return _buildBubble(context, m, textTheme);
                 },
               ),
             ),
@@ -238,7 +116,84 @@ class ChatbotScreen extends ConsumerWidget {
                 ),
               ),
 
-            // Barra inferior de acciones (sin cambiar funcionalidad)
+            // Campo de texto para escribir mensajes
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: cs.surface,
+                border: Border(
+                  top: BorderSide(color: cs.outline.withOpacity(0.2)),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controller.textController,
+                      enabled: !controller.loading,
+                      decoration: InputDecoration(
+                        hintText: 'Escribe tu mensaje...',
+                        hintStyle: textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurface.withOpacity(0.6),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide(color: cs.outline),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide(color: cs.outline),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide(color: cs.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        filled: true,
+                        fillColor: cs.surfaceVariant.withOpacity(0.3),
+                      ),
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurface,
+                      ),
+                      onSubmitted: (text) {
+                        if (text.trim().isNotEmpty && !controller.loading) {
+                          controller.sendUserMessage(text.trim());
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed:
+                        controller.loading
+                            ? null
+                            : () {
+                              final text =
+                                  controller.textController.text.trim();
+                              if (text.isNotEmpty) {
+                                controller.sendUserMessage(text);
+                              }
+                            },
+                    icon: Icon(
+                      Icons.send,
+                      color:
+                          controller.loading
+                              ? cs.onSurface.withOpacity(0.3)
+                              : cs.primary,
+                    ),
+                    style: IconButton.styleFrom(
+                      backgroundColor: cs.primaryContainer.withOpacity(0.3),
+                      shape: const CircleBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Barra inferior de acciones
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(

@@ -13,6 +13,9 @@ class ChatMessage {
 class AgendaController extends ChangeNotifier {
   final AppointmentRepository repository;
 
+  // Controlador de texto para el campo de entrada
+  final TextEditingController textController = TextEditingController();
+
   // Mensajes del chat
   final List<ChatMessage> _messages = [];
   List<ChatMessage> get messages => List.unmodifiable(_messages);
@@ -111,11 +114,18 @@ class AgendaController extends ChangeNotifier {
       optionsText.add('Mostrar más opciones...');
     }
 
+    // Crear el texto del mensaje con las opciones numeradas
+    final messageText =
+        'Estas son las franjas disponibles (próximos 30 días):\n\n'
+        '${optionsText.join('\n')}\n\n'
+        'Escribe el número de la opción que deseas seleccionar.';
+
     _addMessage(
       ChatMessage(
         sender: Sender.bot,
-        text: 'Estas son las franjas disponibles (próximos 30 días):',
-        options: optionsText,
+        text: messageText,
+        options:
+            optionsText, // Mantenemos las opciones para el procesamiento interno
       ),
     );
   }
@@ -221,5 +231,73 @@ class AgendaController extends ChangeNotifier {
   void clearConversation() {
     _messages.clear();
     notifyListeners();
+  }
+
+  /// Procesa mensajes de texto del usuario
+  Future<void> sendUserMessage(String message) async {
+    // Limpiar el campo de texto
+    textController.clear();
+
+    // Agregar el mensaje del usuario al chat
+    _addMessage(ChatMessage(sender: Sender.user, text: message));
+
+    // Procesar el mensaje
+    await _processUserMessage(message);
+  }
+
+  /// Interpreta el mensaje del usuario y ejecuta la acción correspondiente
+  Future<void> _processUserMessage(String message) async {
+    final lowerMessage = message.toLowerCase().trim();
+
+    // Detectar si es un número (selección de opción)
+    final numberMatch = RegExp(r'^(\d+)$').firstMatch(lowerMessage);
+    if (numberMatch != null) {
+      final optionNumber = int.parse(numberMatch.group(1)!);
+      await userSelectOption(optionNumber);
+      return;
+    }
+
+    // Detectar comandos específicos
+    if (lowerMessage.contains('mostrar más') ||
+        lowerMessage.contains('mostrar mas') ||
+        lowerMessage.contains('siguiente')) {
+      // Simular selección de "mostrar más"
+      final lastMessage = _messages.last;
+      if (lastMessage.options != null && lastMessage.options!.isNotEmpty) {
+        // El índice de "mostrar más" es el último elemento de las opciones
+        final showMoreIndex = lastMessage.options!.length;
+        await userSelectOption(showMoreIndex);
+      }
+      return;
+    }
+
+    if (lowerMessage.contains('reiniciar') ||
+        lowerMessage.contains('empezar')) {
+      await startConversation();
+      return;
+    }
+
+    if (lowerMessage.contains('limpiar') || lowerMessage.contains('borrar')) {
+      clearConversation();
+      return;
+    }
+
+    // Si no se reconoce el mensaje, mostrar ayuda
+    _addMessage(
+      ChatMessage(
+        sender: Sender.bot,
+        text:
+            'No entiendo tu mensaje. Por favor escribe:\n'
+            '• Un número para seleccionar una opción (ej: 1, 2, 3...)\n'
+            '• "mostrar más" para ver más opciones\n'
+            '• "reiniciar" para empezar de nuevo',
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    textController.dispose();
+    super.dispose();
   }
 }
