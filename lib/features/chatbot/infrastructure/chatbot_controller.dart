@@ -3,6 +3,8 @@ import 'firestore_chatbot_repository.dart';
 
 enum Sender { bot, user, system }
 
+enum ChatStep { welcome, pestType, establishmentType, showOptions }
+
 class ChatMessage {
   final Sender sender;
   final String text;
@@ -19,6 +21,11 @@ class AgendaController extends ChangeNotifier {
   // Mensajes del chat
   final List<ChatMessage> _messages = [];
   List<ChatMessage> get messages => List.unmodifiable(_messages);
+
+  // step & captured fields
+  ChatStep _step = ChatStep.welcome;
+  String? _pestType;
+  String? _establishmentType;
 
   // Todas las opciones obtenidas (slots) y paginado
   List<DateTime> _allOptions = [];
@@ -64,15 +71,27 @@ class AgendaController extends ChangeNotifier {
 
   Future<void> startConversation() async {
     _messages.clear();
+    _step = ChatStep.welcome;
+    _pestType = null;
+    _establishmentType = null;
     _addMessage(
       ChatMessage(
         sender: Sender.bot,
         text:
-            '¡Hola! Soy el asistente de agendamiento de fumigaciones. Aquí puedes ver las franjas disponibles y reservar tu cita.',
+            '¡Hola! Soy el asistente de agendamiento de fumigaciones. Para comenzar, cuéntame: ¿qué tipo de plaga necesitas tratar? (ej: cucarachas, roedores, mosquitos, chinches, etc.)',
       ),
     );
-    await Future.delayed(const Duration(milliseconds: 400));
-    await _showNextOptions();
+  }
+
+  Future<void> _askEstablishmentType() async {
+    _step = ChatStep.establishmentType;
+    _addMessage(
+      ChatMessage(
+        sender: Sender.bot,
+        text:
+            'Entendido. Ahora dime, ¿qué tipo de establecimiento es? (ej: casa, restaurante, almacén, oficina, bodega, etc.)',
+      ),
+    );
   }
 
   Future<void> _showNextOptions() async {
@@ -100,6 +119,7 @@ class AgendaController extends ChangeNotifier {
   }
 
   void _emitOptionsMessage() {
+    _step = ChatStep.showOptions;
     final slice = _visibleOptions;
     final optionsText =
         slice.asMap().entries.map((e) {
@@ -116,7 +136,7 @@ class AgendaController extends ChangeNotifier {
 
     // Crear el texto del mensaje con las opciones numeradas
     final messageText =
-        'Estas son las franjas disponibles (próximos 30 días):\n\n'
+        'Perfecto. Elige una franja disponible (próximos 30 días):\n\n'
         '${optionsText.join('\n')}\n\n'
         'Escribe el número de la opción que deseas seleccionar.';
 
@@ -140,6 +160,17 @@ class AgendaController extends ChangeNotifier {
 
   /// El método que maneja la selección por número (1..N)
   Future<void> userSelectOption(int optionIndex) async {
+    if (_step != ChatStep.showOptions) {
+      _addMessage(
+        ChatMessage(
+          sender: Sender.bot,
+          text:
+              'Primero necesitamos completar los datos. Responde a la pregunta anterior.',
+        ),
+      );
+      return;
+    }
+
     // Si seleccionó una de las opciones de la página actual o la opción "mostrar más"
     final globalIndex = optionIndex - 1; // convertir a 0-index
     final maxIndex = _allOptions.length - 1;
@@ -175,18 +206,22 @@ class AgendaController extends ChangeNotifier {
     // Registrar el mensaje del usuario con el número que pulsó
     _addMessage(ChatMessage(sender: Sender.user, text: optionIndex.toString()));
 
-    // Usuario considerado logeado: procedemos a reservar directamente
-
     // Si está logeado, procedemos a reservar
     _addMessage(
       ChatMessage(
         sender: Sender.bot,
-        text: 'Perfecto, reservando ${_formatSlot(chosen)}...',
+        text:
+            'Perfecto, reservando ${_formatSlot(chosen)} para plaga: ${_pestType ?? '-'} en ${_establishmentType ?? '-'}...',
       ),
     );
     _setLoading(true);
     try {
-      final appt = await repository.bookSlot(chosen);
+      final appt = await repository.bookSlot(
+        chosen,
+        customerName: null,
+        pestType: _pestType,
+        establishmentType: _establishmentType,
+      );
       _addMessage(
         ChatMessage(
           sender: Sender.bot,
@@ -248,6 +283,19 @@ class AgendaController extends ChangeNotifier {
   /// Interpreta el mensaje del usuario y ejecuta la acción correspondiente
   Future<void> _processUserMessage(String message) async {
     final lowerMessage = message.toLowerCase().trim();
+
+    if (_step == ChatStep.welcome) {
+      // Registrar pest type y avanzar
+      _pestType = message.trim();
+      await _askEstablishmentType();
+      return;
+    }
+
+    if (_step == ChatStep.establishmentType) {
+      _establishmentType = message.trim();
+      await _showNextOptions();
+      return;
+    }
 
     // Detectar si es un número (selección de opción)
     final numberMatch = RegExp(r'^(\d+)$').firstMatch(lowerMessage);

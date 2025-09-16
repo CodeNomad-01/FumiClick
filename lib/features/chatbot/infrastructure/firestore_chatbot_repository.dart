@@ -53,6 +53,8 @@ class ChatbotFirestoreRepository {
   Future<agenda.Appointment> bookSlot(
     DateTime slot, {
     String? customerName,
+    String? pestType,
+    String? establishmentType,
   }) async {
     final normalized = DateTime(slot.year, slot.month, slot.day, slot.hour);
 
@@ -84,6 +86,8 @@ class ChatbotFirestoreRepository {
       id: '',
       slot: normalized,
       customerName: inferredName,
+      pestType: pestType,
+      establishmentType: establishmentType,
     );
 
     final data = appt.toMap(userId: userId);

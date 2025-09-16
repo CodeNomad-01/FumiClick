@@ -35,7 +35,12 @@ class AppointmentHistoryScreen extends ConsumerWidget {
                       .map(
                         (a) => _AppointmentTile(
                           title: a.customerName ?? 'Sin nombre',
-                          subtitle: a.address ?? a.contact ?? '',
+                          subtitle: _buildSubtitle(
+                            a.address,
+                            a.contact,
+                            a.pestType,
+                            a.establishmentType,
+                          ),
                           slot: a.slot,
                         ),
                       )
@@ -49,7 +54,12 @@ class AppointmentHistoryScreen extends ConsumerWidget {
                     .map(
                       (a) => _AppointmentTile(
                         title: a.customerName ?? 'Sin nombre',
-                        subtitle: a.address ?? a.contact ?? '',
+                        subtitle: _buildSubtitle(
+                          a.address,
+                          a.contact,
+                          a.pestType,
+                          a.establishmentType,
+                        ),
                         slot: a.slot,
                       ),
                     )
@@ -59,6 +69,21 @@ class AppointmentHistoryScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _buildSubtitle(
+    String? address,
+    String? contact,
+    String? pestType,
+    String? establishmentType,
+  ) {
+    final parts = <String>[];
+    if (address != null && address.isNotEmpty) parts.add(address);
+    if (contact != null && contact.isNotEmpty) parts.add('Contacto: $contact');
+    if (pestType != null && pestType.isNotEmpty) parts.add('Plaga: $pestType');
+    if (establishmentType != null && establishmentType.isNotEmpty)
+      parts.add('Establecimiento: $establishmentType');
+    return parts.join(' • ');
   }
 }
 

@@ -6,6 +6,8 @@ class Appointment {
   final String? customerName;
   final String? contact;
   final String? address;
+  final String? pestType;
+  final String? establishmentType;
 
   Appointment({
     required this.id,
@@ -13,6 +15,8 @@ class Appointment {
     this.customerName,
     this.contact,
     this.address,
+    this.pestType,
+    this.establishmentType,
   });
 
   factory Appointment.fromMap(String id, Map<String, dynamic> map) {
@@ -29,6 +33,8 @@ class Appointment {
       customerName: map['customerName'] as String?,
       contact: map['contact'] as String?,
       address: map['address'] as String?,
+      pestType: map['pestType'] as String?,
+      establishmentType: map['establishmentType'] as String?,
     );
   }
 
@@ -39,6 +45,8 @@ class Appointment {
       'customerName': customerName,
       'contact': contact,
       'address': address,
+      'pestType': pestType,
+      'establishmentType': establishmentType,
     };
   }
 
@@ -48,6 +56,8 @@ class Appointment {
     String? customerName,
     String? contact,
     String? address,
+    String? pestType,
+    String? establishmentType,
   }) {
     return Appointment(
       id: id ?? this.id,
@@ -55,6 +65,8 @@ class Appointment {
       customerName: customerName ?? this.customerName,
       contact: contact ?? this.contact,
       address: address ?? this.address,
+      pestType: pestType ?? this.pestType,
+      establishmentType: establishmentType ?? this.establishmentType,
     );
   }
 }
