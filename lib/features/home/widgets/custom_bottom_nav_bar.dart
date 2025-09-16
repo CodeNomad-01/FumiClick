@@ -21,6 +21,7 @@ class CustomBottomNavBar extends StatelessWidget {
           icon: Icon(Icons.chat_bubble_outline),
           label: "ChatBot",
         ),
+        BottomNavigationBarItem(icon: Icon(Icons.history), label: "Historial"),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: "Perfil"),
       ],
     );

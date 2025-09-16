@@ -3,17 +3,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/models/appointment.dart';
 import '../data/models/appointment_request.dart';
-import '../infrastructure/appointment_repository.dart';
+import '../infrastructure/firestore_appointment_repository.dart';
 
-final agendaControllerProvider = ChangeNotifierProvider<AgendaController>((ref) {
-  return AgendaController(repository: AppointmentRepository());
+final agendaControllerProvider = ChangeNotifierProvider<AgendaController>((
+  ref,
+) {
+  return AgendaController(repository: FirestoreAppointmentRepository());
 });
 
 class AgendaController extends ChangeNotifier {
-  final AppointmentRepository repository;
+  final FirestoreAppointmentRepository repository;
 
   AgendaController({required this.repository}) {
+    // cargar slots al inicio
     loadSlots();
+    // escuchar cambios del usuario en Firestore para refrescar historial/contador
+    repository.watchUserAppointments().listen((_) {
+      notifyListeners();
+    });
+    // escuchar cambios globales para recomputar slots disponibles
+    repository.watchAllAppointments().listen((_) {
+      loadSlots();
+    });
   }
 
   // UI state

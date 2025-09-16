@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../data/chatbot_repository.dart';
+import 'firestore_chatbot_repository.dart';
 
 enum Sender { bot, user, system }
 
@@ -11,7 +11,7 @@ class ChatMessage {
 }
 
 class AgendaController extends ChangeNotifier {
-  final AppointmentRepository repository;
+  final ChatbotFirestoreRepository repository;
 
   // Controlador de texto para el campo de entrada
   final TextEditingController textController = TextEditingController();
@@ -196,7 +196,7 @@ class AgendaController extends ChangeNotifier {
       );
       // Remover la opción reservada de la lista global
       _allOptions.removeWhere(
-        (s) => AppointmentRepository.isSameSlot(s, chosen),
+        (s) => ChatbotFirestoreRepository.isSameSlot(s, chosen),
       );
       // Ajustar currentPage si hace falta
       final totalPages = (_allOptions.length / _pageSize).ceil();

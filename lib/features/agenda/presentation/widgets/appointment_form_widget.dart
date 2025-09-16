@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fumi_click/features/agenda/presentation/widgets/slot_title.dart';
-import 'package:fumi_click/features/chatbot/data/chatbot_repository.dart';
+import 'package:fumi_click/features/agenda/infrastructure/firestore_appointment_repository.dart';
 
 import '../../providers/agenda_controller.dart';
 
@@ -13,8 +13,7 @@ class AppointmentFormWidget extends ConsumerStatefulWidget {
       _AppointmentFormWidgetState();
 }
 
-class _AppointmentFormWidgetState
-    extends ConsumerState<AppointmentFormWidget> {
+class _AppointmentFormWidgetState extends ConsumerState<AppointmentFormWidget> {
   late final TextEditingController nameController;
   late final TextEditingController contactController;
   late final TextEditingController addressController;
@@ -24,10 +23,12 @@ class _AppointmentFormWidgetState
     super.initState();
     final controller = ref.read(agendaControllerProvider);
     nameController = TextEditingController(text: controller.request.name ?? '');
-    contactController =
-        TextEditingController(text: controller.request.contact ?? '');
-    addressController =
-        TextEditingController(text: controller.request.address ?? '');
+    contactController = TextEditingController(
+      text: controller.request.contact ?? '',
+    );
+    addressController = TextEditingController(
+      text: controller.request.address ?? '',
+    );
   }
 
   @override
@@ -67,8 +68,9 @@ class _AppointmentFormWidgetState
             const SizedBox(height: 8),
             TextField(
               controller: addressController,
-              decoration:
-                  const InputDecoration(labelText: 'Dirección del local'),
+              decoration: const InputDecoration(
+                labelText: 'Dirección del local',
+              ),
               onChanged: controller.updateAddress,
             ),
             const SizedBox(height: 16),
@@ -78,8 +80,9 @@ class _AppointmentFormWidgetState
             if (controller.loading) const LinearProgressIndicator(),
 
             ...controller.visibleSlots.map((s) {
-              final selected = controller.request.chosenSlot != null &&
-                  AppointmentRepository.isSameSlot(
+              final selected =
+                  controller.request.chosenSlot != null &&
+                  FirestoreAppointmentRepository.isSameSlot(
                     controller.request.chosenSlot!,
                     s,
                   );
@@ -92,8 +95,10 @@ class _AppointmentFormWidgetState
 
             if (controller.hasMoreOptions)
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 10,
+                ),
                 child: OutlinedButton(
                   onPressed: controller.showMore,
                   child: const Text('Mostrar más'),
@@ -103,22 +108,23 @@ class _AppointmentFormWidgetState
             const SizedBox(height: 12),
 
             ElevatedButton(
-              onPressed: controller.loading
-                  ? null
-                  : () async {
-                      try {
-                        await controller.submitForm();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Cita reservada correctamente'),
-                          ),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.toString())),
-                        );
-                      }
-                    },
+              onPressed:
+                  controller.loading
+                      ? null
+                      : () async {
+                        try {
+                          await controller.submitForm();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Cita reservada correctamente'),
+                            ),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(e.toString())));
+                        }
+                      },
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12.0),
                 child: Text('Reservar cita'),
