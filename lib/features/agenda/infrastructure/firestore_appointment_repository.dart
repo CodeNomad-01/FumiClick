@@ -123,6 +123,36 @@ class FirestoreAppointmentRepository {
     return stored;
   }
 
+  Future<void> updateAppointmentFields(
+    String appointmentId, {
+    String? customerName,
+    String? contact,
+    String? address,
+    String? pestType,
+    String? establishmentType,
+  }) async {
+    final updates = <String, dynamic>{};
+    if (customerName != null) updates['customerName'] = customerName;
+    if (contact != null) updates['contact'] = contact;
+    if (address != null) updates['address'] = address;
+    if (pestType != null) updates['pestType'] = pestType;
+    if (establishmentType != null)
+      updates['establishmentType'] = establishmentType;
+    if (updates.isEmpty) return;
+    await _db.collection('appointments').doc(appointmentId).update(updates);
+    final idx = _bookedCache.indexWhere((a) => a.id == appointmentId);
+    if (idx != -1) {
+      final current = _bookedCache[idx];
+      _bookedCache[idx] = current.copyWith(
+        customerName: customerName,
+        contact: contact,
+        address: address,
+        pestType: pestType,
+        establishmentType: establishmentType,
+      );
+    }
+  }
+
   Future<void> cancelAppointmentById(String appointmentId) async {
     final doc = _db.collection('appointments').doc(appointmentId);
     await doc.delete();

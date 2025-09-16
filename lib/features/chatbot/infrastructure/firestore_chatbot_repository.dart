@@ -82,10 +82,33 @@ class ChatbotFirestoreRepository {
                 ? user!.email!.split('@').first
                 : 'Usuario'));
 
+    // Leer perfil del usuario para contacto y dirección
+    String? contact;
+    String? address;
+    try {
+      final profileSnap = await _db.collection('users').doc(userId).get();
+      if (profileSnap.exists) {
+        final data = profileSnap.data() as Map<String, dynamic>;
+        final phone = (data['phone'] as String?)?.trim();
+        final addr = (data['address'] as String?)?.trim();
+        contact =
+            (phone != null && phone.isNotEmpty) ? phone : (user?.email ?? '');
+        address = (addr != null && addr.isNotEmpty) ? addr : null;
+      } else {
+        contact = user?.email ?? '';
+        address = null;
+      }
+    } catch (_) {
+      contact = user?.email ?? '';
+      address = null;
+    }
+
     final appt = agenda.Appointment(
       id: '',
       slot: normalized,
       customerName: inferredName,
+      contact: contact,
+      address: address,
       pestType: pestType,
       establishmentType: establishmentType,
     );

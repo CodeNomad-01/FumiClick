@@ -42,24 +42,46 @@ class AppointmentHistoryScreen extends ConsumerWidget {
                             a.establishmentType,
                           ),
                           slot: a.slot,
-                          trailing: IconButton(
-                            icon: const Icon(Icons.cancel_outlined),
-                            color: cs.error,
-                            tooltip: 'Cancelar cita',
-                            onPressed: () async {
-                              final confirmed = await _confirmCancel(context);
-                              if (confirmed != true) return;
-                              await ref
-                                  .read(agendaControllerProvider)
-                                  .cancelAppointment(a.id);
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Cita cancelada'),
-                                  ),
-                                );
-                              }
-                            },
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined),
+                                tooltip: 'Editar',
+                                onPressed:
+                                    () => _openEditSheet(
+                                      context,
+                                      ref,
+                                      a.id,
+                                      name: a.customerName,
+                                      contact: a.contact,
+                                      address: a.address,
+                                      pestType: a.pestType,
+                                      establishmentType: a.establishmentType,
+                                    ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.cancel_outlined),
+                                color: cs.error,
+                                tooltip: 'Cancelar cita',
+                                onPressed: () async {
+                                  final confirmed = await _confirmCancel(
+                                    context,
+                                  );
+                                  if (confirmed != true) return;
+                                  await ref
+                                      .read(agendaControllerProvider)
+                                      .cancelAppointment(a.id);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Cita cancelada'),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       )
@@ -107,6 +129,94 @@ class AppointmentHistoryScreen extends ConsumerWidget {
               child: const Text('Sí, cancelar'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _openEditSheet(
+    BuildContext context,
+    WidgetRef ref,
+    String appointmentId, {
+    String? name,
+    String? contact,
+    String? address,
+    String? pestType,
+    String? establishmentType,
+  }) {
+    final nameCtrl = TextEditingController(text: name ?? '');
+    final contactCtrl = TextEditingController(text: contact ?? '');
+    final addressCtrl = TextEditingController(text: address ?? '');
+    final pestCtrl = TextEditingController(text: pestType ?? '');
+    final estCtrl = TextEditingController(text: establishmentType ?? '');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        final insets = MediaQuery.of(ctx).viewInsets;
+        return Padding(
+          padding: EdgeInsets.only(bottom: insets.bottom),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Editar cita', style: Theme.of(ctx).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(labelText: 'Nombre'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: contactCtrl,
+                  decoration: const InputDecoration(labelText: 'Contacto'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: addressCtrl,
+                  decoration: const InputDecoration(labelText: 'Dirección'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: pestCtrl,
+                  decoration: const InputDecoration(labelText: 'Tipo de plaga'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: estCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Tipo de establecimiento',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: () async {
+                    await ref
+                        .read(agendaControllerProvider)
+                        .updateAppointment(
+                          appointmentId,
+                          customerName: nameCtrl.text.trim(),
+                          contact: contactCtrl.text.trim(),
+                          address: addressCtrl.text.trim(),
+                          pestType: pestCtrl.text.trim(),
+                          establishmentType: estCtrl.text.trim(),
+                        );
+                    if (context.mounted) {
+                      Navigator.of(ctx).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Cita actualizada')),
+                      );
+                    }
+                  },
+                  child: const Text('Guardar cambios'),
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
         );
       },
     );
