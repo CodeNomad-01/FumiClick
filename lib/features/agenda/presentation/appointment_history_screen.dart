@@ -21,7 +21,7 @@ class AppointmentHistoryScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Historial de Citas'),
+        title: const Text('Citas'),
         backgroundColor: cs.primary,
         foregroundColor: cs.onPrimary,
       ),
@@ -42,6 +42,25 @@ class AppointmentHistoryScreen extends ConsumerWidget {
                             a.establishmentType,
                           ),
                           slot: a.slot,
+                          trailing: IconButton(
+                            icon: const Icon(Icons.cancel_outlined),
+                            color: cs.error,
+                            tooltip: 'Cancelar cita',
+                            onPressed: () async {
+                              final confirmed = await _confirmCancel(context);
+                              if (confirmed != true) return;
+                              await ref
+                                  .read(agendaControllerProvider)
+                                  .cancelAppointment(a.id);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Cita cancelada'),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
                         ),
                       )
                       .toList(),
@@ -68,6 +87,28 @@ class AppointmentHistoryScreen extends ConsumerWidget {
           const SizedBox(height: 24),
         ],
       ),
+    );
+  }
+
+  Future<bool?> _confirmCancel(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Cancelar cita'),
+          content: const Text('¿Seguro que deseas cancelar esta cita?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('No'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Sí, cancelar'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -120,10 +161,12 @@ class _AppointmentTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final DateTime slot;
+  final Widget? trailing;
   const _AppointmentTile({
     required this.title,
     required this.subtitle,
     required this.slot,
+    this.trailing,
   });
 
   @override
@@ -141,6 +184,7 @@ class _AppointmentTile extends StatelessWidget {
         title: Text(title),
         subtitle: Text('$subtitle\n$dateText • $timeText'),
         isThreeLine: true,
+        trailing: trailing,
       ),
     );
   }

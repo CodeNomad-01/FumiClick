@@ -123,6 +123,12 @@ class FirestoreAppointmentRepository {
     return stored;
   }
 
+  Future<void> cancelAppointmentById(String appointmentId) async {
+    final doc = _db.collection('appointments').doc(appointmentId);
+    await doc.delete();
+    _bookedCache.removeWhere((a) => a.id == appointmentId);
+  }
+
   List<Appointment> getBookedAppointments() => List.unmodifiable(_bookedCache);
 
   static bool isSameSlot(DateTime a, DateTime b) =>

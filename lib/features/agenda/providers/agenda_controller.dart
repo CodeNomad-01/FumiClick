@@ -116,6 +116,11 @@ class AgendaController extends ChangeNotifier {
     reset();
   }
 
+  Future<void> cancelAppointment(String appointmentId) async {
+    await repository.cancelAppointmentById(appointmentId);
+    notifyListeners();
+  }
+
   void reset() {
     request.name = null;
     request.contact = null;
