@@ -57,6 +57,7 @@ class TecnicoAppointmentsScreen extends ConsumerWidget {
             Text('Dirección: ${cita.direccion}'),
             Text('Hora: ${cita.slot.hour.toString().padLeft(2, '0')}:${cita.slot.minute.toString().padLeft(2, '0')}'),
             Text('Servicio: ${cita.tipoServicio}'),
+            Text('Teléfono: ${cita.contact}'),
             const SizedBox(height: 16),
             Text('Estado actual: ${cita.estado ?? 'Sin estado'}'),
           ],

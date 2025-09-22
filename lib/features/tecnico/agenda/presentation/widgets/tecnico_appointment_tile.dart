@@ -42,7 +42,22 @@ class _TecnicoAppointmentTileContentState extends State<_TecnicoAppointmentTileC
   bool _cambiando = false;
   bool _modificado = false;
 
-  final List<String> estados = ['pendiente', 'completada', 'cancelada'];
+  final List<String> estados = ['pendiente', 'en_progreso', 'completada', 'cancelada'];
+
+  String _getEstadoLabel(String estado) {
+    switch (estado) {
+      case 'pendiente':
+        return 'Pendiente';
+      case 'en_progreso':
+        return 'En progreso';
+      case 'completada':
+        return 'Completada';
+      case 'cancelada':
+        return 'Cancelada';
+      default:
+        return estado;
+    }
+  }
 
   @override
   void initState() {
@@ -68,16 +83,18 @@ class _TecnicoAppointmentTileContentState extends State<_TecnicoAppointmentTileC
                 value: _estado,
                 decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true),
                 items: estados
-                    .map((e) => DropdownMenuItem(
+                    .map((e) => DropdownMenuItem<String>(
                           value: e,
                           child: Text(
-                            e[0].toUpperCase() + e.substring(1),
+                            _getEstadoLabel(e),
                             style: TextStyle(
                               color: e == 'completada'
                                   ? cs.primary
                                   : e == 'cancelada'
                                       ? cs.error
-                                      : cs.onSurface,
+                                      : e == 'en_progreso'
+                                          ? cs.secondary
+                                          : cs.onSurface,
                             ),
                           ),
                         ))
@@ -91,6 +108,8 @@ class _TecnicoAppointmentTileContentState extends State<_TecnicoAppointmentTileC
                   }
                 },
               ),
+
+
             ),
           ],
         ),
@@ -116,6 +135,14 @@ class _TecnicoAppointmentTileContentState extends State<_TecnicoAppointmentTileC
             Icon(Icons.bug_report, color: cs.error),
             const SizedBox(width: 6),
             Expanded(child: Text(widget.cita.tipoServicio, style: Theme.of(context).textTheme.bodyMedium)),
+          ],
+        ),
+         const SizedBox(height: 6),
+        Row(
+          children: [
+            Icon(Icons.phone, color: cs.error),
+            const SizedBox(width: 6),
+            Expanded(child: Text(widget.cita.contact, style: Theme.of(context).textTheme.bodyMedium)),
           ],
         ),
         const SizedBox(height: 12),

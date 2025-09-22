@@ -37,7 +37,7 @@ class Appointment {
       address: map['address'] as String?,
       pestType: map['pestType'] as String?,
       establishmentType: map['establishmentType'] as String?,
-      status: map['status'] as String? ?? 'proximo',
+      status: map['estado'] as String? ?? 'proximo',
     );
   }
 

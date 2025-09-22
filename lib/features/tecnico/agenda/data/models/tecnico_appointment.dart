@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class TecnicoAppointment {
   final String id;
   final String clienteNombre;
+  final String contact;
   final String direccion;
   final DateTime slot;
   final String tipoServicio;
@@ -13,7 +14,9 @@ class TecnicoAppointment {
     required this.direccion,
     required this.slot,
     required this.tipoServicio,
+    required this.contact,
     this.estado,
+
   });
 
   factory TecnicoAppointment.fromMap(Map<String, dynamic> map, String id) {
@@ -23,6 +26,7 @@ class TecnicoAppointment {
       direccion: map['address'] ?? '',
       slot: (map['slot'] as Timestamp).toDate(),
       tipoServicio: map['pestType'] ?? '',
+      contact: map['contact'] ?? '',
       estado: map['estado'] as String?,
     );
   }

@@ -10,14 +10,20 @@ class AppointmentHistoryScreen extends ConsumerWidget {
     final controller = ref.watch(agendaControllerProvider);
     final cs = Theme.of(context).colorScheme;
 
-    final now = DateTime.now();
     final all = controller.booked;
-    final past =
-        all.where((a) => a.slot.isBefore(now)).toList()
-          ..sort((a, b) => b.slot.compareTo(a.slot));
-    final upcoming =
-        all.where((a) => !a.slot.isBefore(now)).toList()
-          ..sort((a, b) => a.slot.compareTo(b.slot));
+    // Agrupar por status
+    final pendientes = all
+        .where((a) =>  a.status.isEmpty || a.status == 'pendiente')
+        .toList()
+      ..sort((a, b) => a.slot.compareTo(b.slot));
+    final enProgreso = all
+        .where((a) => a.status == 'en_progreso')
+        .toList()
+      ..sort((a, b) => a.slot.compareTo(b.slot));
+    final completadas = all
+        .where((a) => a.status == 'completada')
+        .toList()
+      ..sort((a, b) => b.slot.compareTo(a.slot));
 
     return Scaffold(
       appBar: AppBar(
@@ -27,84 +33,99 @@ class AppointmentHistoryScreen extends ConsumerWidget {
       ),
       body: ListView(
         children: [
-          if (upcoming.isNotEmpty)
-            _Section(
-              title: 'Pendientes',
-              children:
-                  upcoming
-                      .map(
-                        (a) => _AppointmentTile(
-                          title: a.customerName ?? 'Sin nombre',
-                          subtitle: _buildSubtitle(
-                            a.address,
-                            a.contact,
-                            a.pestType,
-                            a.establishmentType,
-                          ),
-                          slot: a.slot,
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit_outlined),
-                                tooltip: 'Editar',
-                                onPressed:
-                                    () => _openEditSheet(
-                                      context,
-                                      ref,
-                                      a.id,
-                                      name: a.customerName,
-                                      contact: a.contact,
-                                      address: a.address,
-                                      pestType: a.pestType,
-                                      establishmentType: a.establishmentType,
-                                    ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.cancel_outlined),
-                                color: cs.error,
-                                tooltip: 'Cancelar cita',
-                                onPressed: () async {
-                                  final confirmed = await _confirmCancel(
-                                    context,
-                                  );
-                                  if (confirmed != true) return;
-                                  await ref
-                                      .read(agendaControllerProvider)
-                                      .cancelAppointment(a.id);
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Cita cancelada'),
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
-                            ],
+          _Section(
+            title: 'Pendientes',
+            emptyText: pendientes.isEmpty ? 'No hay citas pendientes' : null,
+            children: pendientes
+                .map(
+                  (a) => _AppointmentTile(
+                    title: a.customerName ?? 'Sin nombre',
+                    subtitle: _buildSubtitle(
+                      a.address,
+                      a.contact,
+                      a.pestType,
+                      a.establishmentType,
+                    ),
+                    slot: a.slot,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          tooltip: 'Editar',
+                          onPressed: () => _openEditSheet(
+                            context,
+                            ref,
+                            a.id,
+                            name: a.customerName,
+                            contact: a.contact,
+                            address: a.address,
+                            pestType: a.pestType,
+                            establishmentType: a.establishmentType,
                           ),
                         ),
-                      )
-                      .toList(),
-            ),
+                        IconButton(
+                          icon: const Icon(Icons.cancel_outlined),
+                          color: cs.error,
+                          tooltip: 'Cancelar cita',
+                          onPressed: () async {
+                            final confirmed = await _confirmCancel(
+                              context,
+                            );
+                            if (confirmed != true) return;
+                            await ref
+                                .read(agendaControllerProvider)
+                                .cancelAppointment(a.id);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Cita cancelada'),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+          _Section(
+            title: 'En progreso',
+            emptyText: enProgreso.isEmpty ? 'No hay citas en progreso' : null,
+            children: enProgreso
+                .map(
+                  (a) => _AppointmentTile(
+                    title: a.customerName ?? 'Sin nombre',
+                    subtitle: _buildSubtitle(
+                      a.address,
+                      a.contact,
+                      a.pestType,
+                      a.establishmentType,
+                    ),
+                    slot: a.slot,
+                  ),
+                )
+                .toList(),
+          ),
           _Section(
             title: 'Completadas',
-            emptyText: past.isEmpty ? 'Aún no hay citas realizadas' : null,
-            children:
-                past
-                    .map(
-                      (a) => _AppointmentTile(
-                        title: a.customerName ?? 'Sin nombre',
-                        subtitle: _buildSubtitle(
-                          a.address,
-                          a.contact,
-                          a.pestType,
-                          a.establishmentType,
-                        ),
-                        slot: a.slot,
-                      ),
-                    )
-                    .toList(),
+            emptyText: completadas.isEmpty ? 'Aún no hay citas realizadas' : null,
+            children: completadas
+                .map(
+                  (a) => _AppointmentTile(
+                    title: a.customerName ?? 'Sin nombre',
+                    subtitle: _buildSubtitle(
+                      a.address,
+                      a.contact,
+                      a.pestType,
+                      a.establishmentType,
+                    ),
+                    slot: a.slot,
+                  ),
+                )
+                .toList(),
           ),
           const SizedBox(height: 24),
         ],

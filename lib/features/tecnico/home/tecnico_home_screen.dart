@@ -16,10 +16,6 @@ class TecnicoHomeScreen extends StatelessWidget {
         onTap: onTap,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.event),
             label: 'Citas',
           ),
