@@ -38,9 +38,10 @@ class Appointment {
     );
   }
 
-  Map<String, dynamic> toMap({required String userId}) {
+  Map<String, dynamic> toMap({required String userId, String? email}) {
     return {
       'userId': userId,
+      'email': email,
       'slot': slot,
       'customerName': customerName,
       'contact': contact,

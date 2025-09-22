@@ -29,7 +29,7 @@ class AppointmentHistoryScreen extends ConsumerWidget {
         children: [
           if (upcoming.isNotEmpty)
             _Section(
-              title: 'Próximas',
+              title: 'Pendientes',
               children:
                   upcoming
                       .map(
@@ -88,7 +88,7 @@ class AppointmentHistoryScreen extends ConsumerWidget {
                       .toList(),
             ),
           _Section(
-            title: 'Realizadas',
+            title: 'Completadas',
             emptyText: past.isEmpty ? 'Aún no hay citas realizadas' : null,
             children:
                 past

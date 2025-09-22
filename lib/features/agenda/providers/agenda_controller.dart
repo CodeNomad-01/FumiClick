@@ -84,6 +84,16 @@ class AgendaController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateEstablishmentType(String v) {
+    request.establishmentType = v;
+    notifyListeners();
+  }
+
+  void updatePestType(String v) {
+    request.pestType = v;
+    notifyListeners();
+  }
+
   void selectSlot(DateTime slot) {
     request.chosenSlot = slot;
     notifyListeners();
@@ -100,7 +110,9 @@ class AgendaController extends ChangeNotifier {
     if (request.name == null ||
         request.contact == null ||
         request.address == null ||
-        request.chosenSlot == null) {
+        request.chosenSlot == null ||
+        request.establishmentType == null ||
+        request.pestType == null) {
       throw Exception('Todos los campos y la franja deben estar completos');
     }
 
@@ -110,6 +122,8 @@ class AgendaController extends ChangeNotifier {
       customerName: request.name,
       contact: request.contact,
       address: request.address,
+      establishmentType: request.establishmentType,
+      pestType: request.pestType,
     );
 
     await repository.bookAppointment(appointment);
@@ -141,10 +155,12 @@ class AgendaController extends ChangeNotifier {
   }
 
   void reset() {
-    request.name = null;
-    request.contact = null;
-    request.address = null;
-    request.chosenSlot = null;
-    notifyListeners();
+  request.name = null;
+  request.contact = null;
+  request.address = null;
+  request.chosenSlot = null;
+  request.establishmentType = null;
+  request.pestType = null;
+  notifyListeners();
   }
 }

@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fumi_click/features/auth/provider/auth_notifier_provider.dart';
 import 'package:fumi_click/features/auth/provider/auth_provider.dart';
 import 'package:fumi_click/features/profile/presentation/user_not_found.dart';
+import 'package:fumi_click/features/profile/presentation/edit_profile_screen.dart';
 import 'package:fumi_click/features/profile/provider/user_profile_provider.dart';
-import 'package:fumi_click/features/profile/data/user_profile.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -29,7 +29,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final userAsyncValue = ref.watch(userAuthProvider);
-    final profileAsync = ref.watch(userProfileStreamProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -37,101 +36,169 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       data: (user) {
         if (user == null) return const UserNotFound();
 
-        profileAsync.whenData((profile) {
-          _nameController.text = profile?.name ?? (user.displayName ?? '');
-          _phoneController.text = profile?.phone ?? '';
-          _addressController.text = profile?.address ?? '';
-        });
+        final profileByEmailAsync = ref.watch(
+          userProfileByEmailProvider(user.email ?? ''),
+        );
 
-        return Scaffold(
-          backgroundColor: colorScheme.surface,
-          appBar: AppBar(
-            title: const Text('Mi Perfil'),
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-          ),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundColor: colorScheme.surfaceContainerHigh,
-                      child: Icon(
-                        Icons.person,
-                        size: 60,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('Datos personales', style: textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'Nombre'),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: TextEditingController(text: user.email ?? ''),
-                    readOnly: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Correo electrónico',
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(labelText: 'Teléfono'),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _addressController,
-                    decoration: const InputDecoration(labelText: 'Dirección'),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: () async {
-                      final toSave = UserProfile(
-                        userId: user.uid,
-                        name: _nameController.text.trim(),
-                        phone: _phoneController.text.trim(),
-                        address: _addressController.text.trim(),
-                      );
-                      await ref
-                          .read(userProfileRepositoryProvider)
-                          .saveCurrentUserProfile(toSave);
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Perfil actualizado')),
-                        );
-                      }
-                    },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                    ),
-                    child: const Text('Guardar cambios'),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: () {
-                      ref.read(authNotifierProvider.notifier).logout();
-                    },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: colorScheme.error,
-                      foregroundColor: colorScheme.onError,
-                    ),
-                    child: const Text('Cerrar sesión'),
-                  ),
-                ],
+        return profileByEmailAsync.when(
+          data: (profile) {
+            if (profile == null) return const UserNotFound();
+            _nameController.text = profile.name ?? (user.displayName ?? '');
+            _phoneController.text = profile.phone ?? '';
+            _addressController.text = profile.address ?? '';
+            final userRole = profile.role ?? 'usuario';
+
+            return Scaffold(
+              backgroundColor: colorScheme.surface,
+              appBar: AppBar(
+                title: const Text('Mi Perfil'),
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
               ),
-            ),
-          ),
+              body: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: colorScheme.surfaceContainerHigh,
+                          child: Icon(
+                            Icons.person,
+                            size: 60,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text('Datos personales', style: textTheme.titleMedium),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.verified_user, size: 20),
+                          const SizedBox(width: 8),
+                          Text('Rol: ', style: textTheme.bodyMedium),
+                          Text(
+                            userRole,
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          'Nombre',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        profile.name ?? '',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          'Correo electrónico',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        user.email ?? '',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          'Teléfono',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        profile.phone ?? '',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          'Dirección',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        profile.address ?? '',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const EditProfileScreen(),
+                            ),
+                          );
+                          // Actualizar los datos locales después de editar
+                          ref.invalidate(
+                            userProfileByEmailProvider(user.email ?? ''),
+                          );
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: colorScheme.primary,
+                          foregroundColor: colorScheme.onPrimary,
+                        ),
+                        child: const Text('Actualizar datos'),
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton(
+                        onPressed: () {
+                          ref.read(authNotifierProvider.notifier).logout();
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: colorScheme.error,
+                          foregroundColor: colorScheme.onError,
+                        ),
+                        child: const Text('Cerrar sesión'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+          loading:
+              () => Center(
+                child: CircularProgressIndicator(color: colorScheme.primary),
+              ),
+          error:
+              (error, stack) => Center(
+                child: Text(
+                  'Error: $error',
+                  style: TextStyle(color: colorScheme.error),
+                ),
+              ),
         );
       },
       error:

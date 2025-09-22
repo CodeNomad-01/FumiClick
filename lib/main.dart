@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fumi_click/features/agenda/presentation/appointment_form_screen.dart';
 import 'package:fumi_click/features/agenda/presentation/appointment_history_screen.dart';
 import 'package:fumi_click/features/auth/presentation/login_screen.dart';
-import 'package:fumi_click/features/auth/provider/auth_provider.dart';
+import 'package:fumi_click/features/auth/provider/user_with_role_provider.dart';
 import 'package:fumi_click/features/chatbot/presentation/chatbot_screen.dart';
 import 'package:fumi_click/features/home/home.dart';
 import 'package:fumi_click/features/profile/presentation/profile_screen.dart';
@@ -24,7 +24,7 @@ class MainApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final brightness = View.of(context).platformDispatcher.platformBrightness;
-    final userAsyncValue = ref.watch(userAuthProvider);
+  final userWithRole = ref.watch(userWithRoleProvider);
 
     TextTheme textTheme = createTextTheme(context, "Inter", "Roboto Flex");
     MaterialTheme theme = MaterialTheme(textTheme);
@@ -32,23 +32,31 @@ class MainApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       title: 'Fumi Click',
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
-
-      home: userAsyncValue.when(
-        data: (user) {
-          return user == null
-              ? const LoginScreen()
-              : HomeScreen(
-                pages: const [
-                  AppointmentFormScreen(),
-                  ChatbotScreen(),
-                  AppointmentHistoryScreen(),
-                  ProfileScreen(),
-                ],
-              );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
-      ),
+      home: _buildHome(userWithRole),
     );
   }
-}
+
+  Widget _buildHome(UserWithRoleState state) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state.firebaseUser == null) {
+      return const LoginScreen();
+    }
+    if (state.role == 'tecnico') {
+      return const Scaffold(
+        body: Center(child: Text('Bienvenido técnico', style: TextStyle(fontSize: 24))),
+      );
+    }
+    // Usuario normal
+    return HomeScreen(
+      pages: const [
+        AppointmentFormScreen(),
+        ChatbotScreen(),
+        AppointmentHistoryScreen(),
+        ProfileScreen(),
+      ],
+    );
+  }
+  }
+

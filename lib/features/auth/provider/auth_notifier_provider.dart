@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fumi_click/features/auth/infrastructure/repository/auth_repository.dart';
 import 'package:fumi_click/features/auth/provider/auth_provider.dart';
@@ -15,6 +16,8 @@ class AsyncAuthNotifier extends AsyncNotifier {
   FutureOr build() async {
     _authRepository = ref.read(authRepositoryProvider);
   }
+
+  User? get currentUser => _authRepository.currentUser;
 
   Future<void> register(String email, String password) async {
     state = const AsyncValue.loading();

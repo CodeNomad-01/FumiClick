@@ -70,6 +70,7 @@ class ChatbotFirestoreRepository {
 
     final user = _auth.currentUser;
     final userId = user?.uid;
+    final email = user?.email;
     if (userId == null) {
       throw Exception('Usuario no autenticado');
     }
@@ -113,7 +114,7 @@ class ChatbotFirestoreRepository {
       establishmentType: establishmentType,
     );
 
-    final data = appt.toMap(userId: userId);
+    final data = appt.toMap(userId: userId, email: email);
     data['slot'] = Timestamp.fromDate(normalized);
     data['createdAt'] = FieldValue.serverTimestamp();
 

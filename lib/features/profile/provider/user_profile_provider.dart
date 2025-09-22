@@ -2,6 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/user_profile.dart';
 import '../infrastructure/user_profile_repository.dart';
 
+final userProfileByEmailProvider = FutureProvider.family<UserProfile?, String>((ref, email) async {
+  return await ref.read(userProfileRepositoryProvider).loadUserProfileByEmail(email);
+});
+
 final userProfileRepositoryProvider = Provider<UserProfileRepository>((ref) {
   return UserProfileRepository();
 });

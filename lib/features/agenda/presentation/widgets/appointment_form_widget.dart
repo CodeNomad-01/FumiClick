@@ -17,26 +17,28 @@ class _AppointmentFormWidgetState extends ConsumerState<AppointmentFormWidget> {
   late final TextEditingController nameController;
   late final TextEditingController contactController;
   late final TextEditingController addressController;
+  late final TextEditingController establishmentTypeController;
+  late final TextEditingController pestTypeController;
 
   @override
   void initState() {
     super.initState();
     final controller = ref.read(agendaControllerProvider);
     nameController = TextEditingController(text: controller.request.name ?? '');
-    contactController = TextEditingController(
-      text: controller.request.contact ?? '',
-    );
-    addressController = TextEditingController(
-      text: controller.request.address ?? '',
-    );
+    contactController = TextEditingController(text: controller.request.contact ?? '');
+    addressController = TextEditingController(text: controller.request.address ?? '');
+    establishmentTypeController = TextEditingController(text: controller.request.establishmentType ?? '');
+    pestTypeController = TextEditingController(text: controller.request.pestType ?? '');
   }
 
   @override
   void dispose() {
-    nameController.dispose();
-    contactController.dispose();
-    addressController.dispose();
-    super.dispose();
+  nameController.dispose();
+  contactController.dispose();
+  addressController.dispose();
+  establishmentTypeController.dispose();
+  pestTypeController.dispose();
+  super.dispose();
   }
 
   @override
@@ -72,6 +74,22 @@ class _AppointmentFormWidgetState extends ConsumerState<AppointmentFormWidget> {
                 labelText: 'Dirección del local',
               ),
               onChanged: controller.updateAddress,
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: establishmentTypeController,
+              decoration: const InputDecoration(
+                labelText: 'Tipo de bodega/establecimiento',
+              ),
+              onChanged: controller.updateEstablishmentType,
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: pestTypeController,
+              decoration: const InputDecoration(
+                labelText: 'Tipo de bichos/peste a fumigar',
+              ),
+              onChanged: controller.updatePestType,
             ),
             const SizedBox(height: 16),
             Text('Franjas disponibles', style: textTheme.titleMedium),

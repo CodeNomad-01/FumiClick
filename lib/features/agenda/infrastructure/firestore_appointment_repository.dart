@@ -5,6 +5,7 @@ import '../data/models/appointment.dart';
 import 'appointment_repository.dart' as mem_repo;
 
 class FirestoreAppointmentRepository {
+  String? get currentUserEmail => _auth.currentUser?.email;
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
 
@@ -21,12 +22,12 @@ class FirestoreAppointmentRepository {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    _subscription ??=
-        _db
-            .collection('appointments')
-            .where('userId', isEqualTo: user.uid)
-            .orderBy('slot', descending: true)
-            .snapshots();
+  _subscription ??=
+    _db
+      .collection('appointments')
+      .where('email', isEqualTo: user.email)
+      .orderBy('slot', descending: true)
+      .snapshots();
 
     _subscription!.listen((snapshot) {
       _bookedCache
@@ -36,19 +37,20 @@ class FirestoreAppointmentRepository {
   }
 
   Stream<List<Appointment>> watchUserAppointments() {
-    final user = _auth.currentUser;
-    if (user == null) return const Stream.empty();
-    return _db
-        .collection('appointments')
-        .where('userId', isEqualTo: user.uid)
-        .orderBy('slot', descending: true)
-        .snapshots()
-        .map(
-          (snap) =>
-              snap.docs
-                  .map((d) => Appointment.fromMap(d.id, d.data()))
-                  .toList(),
-        );
+  final user = _auth.currentUser;
+  final email = user?.email;
+  if (email == null) return const Stream.empty();
+  return _db
+    .collection('appointments')
+    .where('email', isEqualTo: email)
+    .orderBy('slot', descending: true)
+    .snapshots()
+    .map(
+      (snap) =>
+        snap.docs
+          .map((d) => Appointment.fromMap(d.id, d.data()))
+          .toList(),
+    );
   }
 
   Stream<void> watchAllAppointments() {
@@ -105,12 +107,16 @@ class FirestoreAppointmentRepository {
       throw Exception('Este horario ya está reservado');
     }
 
-    final userId = _auth.currentUser?.uid;
+    final user = _auth.currentUser;
+    final userId = user?.uid;
+    final email = user?.email;
     if (userId == null) {
       throw Exception('Usuario no autenticado');
     }
 
-    final data = appointment.toMap(userId: userId);
+      final data = appointment.toMap(userId: userId, email: email);
+      data['pestType'] = appointment.pestType; // Ensure pestType is included
+      data['establishmentType'] = appointment.establishmentType; // Ensure establishmentType is included
     data['slot'] = Timestamp.fromDate(slotNormalized);
     data['createdAt'] = FieldValue.serverTimestamp();
 

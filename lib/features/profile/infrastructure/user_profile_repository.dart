@@ -3,6 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../data/user_profile.dart';
 
 class UserProfileRepository {
+  Future<UserProfile?> loadUserProfileByEmail(String email) async {
+    final query = await _db.collection('users').where('email', isEqualTo: email).limit(1).get();
+    if (query.docs.isEmpty) return null;
+    final doc = query.docs.first;
+    return UserProfile.fromMap(doc.id, doc.data());
+  }
   final FirebaseFirestore _db;
   final FirebaseAuth _auth;
 
