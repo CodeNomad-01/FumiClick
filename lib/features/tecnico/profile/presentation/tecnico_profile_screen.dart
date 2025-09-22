@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../provider/tecnico_profile_provider.dart';
 
 class TecnicoProfileScreen extends ConsumerWidget {
@@ -85,8 +86,11 @@ class TecnicoProfileScreen extends ConsumerWidget {
 
   Future<void> _signOut(BuildContext context) async {
     await Future.delayed(const Duration(milliseconds: 300));
-    // Aquí deberías llamar a FirebaseAuth.instance.signOut();
-    // y navegar al login si aplica
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    // Cierra la sesión en Firebase
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      debugPrint('Error al cerrar sesión: $e');
+    }
   }
 }
