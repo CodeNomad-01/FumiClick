@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fumi_click/features/auth/provider/auth_notifier_provider.dart';
-import 'package:fumi_click/features/profile/data/user_profile.dart';
-import 'package:fumi_click/features/profile/provider/user_profile_provider.dart';
+import 'package:fumi_click/features/usuario/profile/data/user_profile.dart';
+import 'package:fumi_click/features/usuario/profile/provider/user_profile_provider.dart';
 import 'package:fumi_click/utils/validators.dart';
 
 class SignUpForm extends ConsumerStatefulWidget {

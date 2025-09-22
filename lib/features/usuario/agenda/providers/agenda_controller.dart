@@ -124,6 +124,7 @@ class AgendaController extends ChangeNotifier {
       address: request.address,
       establishmentType: request.establishmentType,
       pestType: request.pestType,
+      status: 'proximo',
     );
 
     await repository.bookAppointment(appointment);

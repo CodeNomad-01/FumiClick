@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fumi_click/features/agenda/presentation/widgets/slot_title.dart';
-import 'package:fumi_click/features/agenda/infrastructure/firestore_appointment_repository.dart';
+import 'package:fumi_click/features/usuario/agenda/presentation/widgets/slot_title.dart';
+import 'package:fumi_click/features/usuario/agenda/infrastructure/firestore_appointment_repository.dart';
 
 import '../../providers/agenda_controller.dart';
 

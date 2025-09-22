@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fumi_click/features/home/widgets/custom_bottom_nav_bar.dart';
+import 'package:fumi_click/features/usuario/home/widgets/custom_bottom_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<Widget> pages;

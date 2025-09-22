@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fumi_click/features/agenda/presentation/widgets/appointment_form_widget.dart';
-import 'package:fumi_click/features/agenda/providers/agenda_controller.dart';
+import 'package:fumi_click/features/usuario/agenda/presentation/widgets/appointment_form_widget.dart';
+import 'package:fumi_click/features/usuario/agenda/providers/agenda_controller.dart';
 
 class AppointmentFormScreen extends ConsumerWidget {
   const AppointmentFormScreen({super.key});

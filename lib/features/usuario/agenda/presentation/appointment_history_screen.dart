@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fumi_click/features/agenda/providers/agenda_controller.dart';
+import 'package:fumi_click/features/usuario/agenda/providers/agenda_controller.dart';
 
 class AppointmentHistoryScreen extends ConsumerWidget {
   const AppointmentHistoryScreen({super.key});

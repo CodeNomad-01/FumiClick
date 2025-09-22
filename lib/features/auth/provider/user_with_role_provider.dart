@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fumi_click/features/profile/data/user_profile.dart';
-import 'package:fumi_click/features/profile/infrastructure/user_profile_repository.dart';
-import 'package:fumi_click/features/profile/provider/user_profile_provider.dart';
+import 'package:fumi_click/features/usuario/profile/data/user_profile.dart';
+import 'package:fumi_click/features/usuario/profile/infrastructure/user_profile_repository.dart';
+import 'package:fumi_click/features/usuario/profile/provider/user_profile_provider.dart';
 
 class UserWithRoleState {
   final User? firebaseUser;

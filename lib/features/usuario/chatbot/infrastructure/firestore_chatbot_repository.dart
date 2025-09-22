@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fumi_click/features/agenda/data/models/appointment.dart'
+import 'package:fumi_click/features/usuario/agenda/data/models/appointment.dart'
     as agenda;
-import 'package:fumi_click/features/agenda/infrastructure/appointment_repository.dart'
+import 'package:fumi_click/features/usuario/agenda/infrastructure/appointment_repository.dart'
     as mem_repo;
 
 class ChatbotFirestoreRepository {
@@ -56,32 +56,30 @@ class ChatbotFirestoreRepository {
     String? pestType,
     String? establishmentType,
   }) async {
-    final normalized = DateTime(slot.year, slot.month, slot.day, slot.hour);
+  final normalized = DateTime(slot.year, slot.month, slot.day, slot.hour);
 
-    final collision =
-        await _db
-            .collection('appointments')
-            .where('slot', isEqualTo: Timestamp.fromDate(normalized))
-            .limit(1)
-            .get();
+    final collision = await _db
+        .collection('appointments')
+        .where('slot', isEqualTo: Timestamp.fromDate(normalized))
+        .limit(1)
+        .get();
     if (collision.docs.isNotEmpty) {
       throw Exception('Slot already booked');
     }
 
-    final user = _auth.currentUser;
-    final userId = user?.uid;
-    final email = user?.email;
-    if (userId == null) {
-      throw Exception('Usuario no autenticado');
-    }
+  final user = _auth.currentUser;
+  final userId = user?.uid;
+  final email = user?.email;
+  if (userId == null) {
+    throw Exception('Usuario no autenticado');
+  }
 
-    final inferredName =
-        customerName ??
-        (user?.displayName?.trim().isNotEmpty == true
-            ? user!.displayName!
-            : (user?.email != null
-                ? user!.email!.split('@').first
-                : 'Usuario'));
+  final inferredName = customerName ??
+    (user?.displayName != null && user!.displayName!.trim().isNotEmpty
+      ? user.displayName!
+      : (user?.email != null && user?.email!.isNotEmpty == true
+        ? user?.email!.split('@').first ?? 'Usuario'
+        : 'Usuario'));
 
     // Leer perfil del usuario para contacto y dirección
     String? contact;
@@ -92,19 +90,18 @@ class ChatbotFirestoreRepository {
         final data = profileSnap.data() as Map<String, dynamic>;
         final phone = (data['phone'] as String?)?.trim();
         final addr = (data['address'] as String?)?.trim();
-        contact =
-            (phone != null && phone.isNotEmpty) ? phone : (user?.email ?? '');
+  contact = (phone != null && phone.isNotEmpty) ? phone : (user?.email ?? '');
         address = (addr != null && addr.isNotEmpty) ? addr : null;
       } else {
-        contact = user?.email ?? '';
+  contact = user?.email ?? '';
         address = null;
       }
     } catch (_) {
-      contact = user?.email ?? '';
+  contact = user?.email ?? '';
       address = null;
     }
 
-    final appt = agenda.Appointment(
+    final appointment = agenda.Appointment(
       id: '',
       slot: normalized,
       customerName: inferredName,
@@ -112,15 +109,16 @@ class ChatbotFirestoreRepository {
       address: address,
       pestType: pestType,
       establishmentType: establishmentType,
+      status: 'proximo',
     );
 
-    final data = appt.toMap(userId: userId, email: email);
+    final data = appointment.toMap(userId: userId, email: email);
     data['slot'] = Timestamp.fromDate(normalized);
     data['createdAt'] = FieldValue.serverTimestamp();
 
     final docRef = await _db.collection('appointments').add(data);
 
-    return appt.copyWith(id: docRef.id);
+    return appointment.copyWith(id: docRef.id);
   }
 
   static bool isSameSlot(DateTime a, DateTime b) =>

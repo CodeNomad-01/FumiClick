@@ -1,13 +1,16 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fumi_click/features/agenda/presentation/appointment_form_screen.dart';
-import 'package:fumi_click/features/agenda/presentation/appointment_history_screen.dart';
+import 'package:fumi_click/features/tecnico/agenda/presentation/tecnico_appointments_screen.dart';
+import 'package:fumi_click/features/tecnico/home/tecnico_home_screen.dart';
+import 'package:fumi_click/features/tecnico/home/tecnico_main_screen.dart';
+import 'package:fumi_click/features/usuario/agenda/presentation/appointment_form_screen.dart';
+import 'package:fumi_click/features/usuario/agenda/presentation/appointment_history_screen.dart';
 import 'package:fumi_click/features/auth/presentation/login_screen.dart';
 import 'package:fumi_click/features/auth/provider/user_with_role_provider.dart';
-import 'package:fumi_click/features/chatbot/presentation/chatbot_screen.dart';
-import 'package:fumi_click/features/home/home.dart';
-import 'package:fumi_click/features/profile/presentation/profile_screen.dart';
+import 'package:fumi_click/features/usuario/chatbot/presentation/chatbot_screen.dart';
+import 'package:fumi_click/features/usuario/home/home.dart';
+import 'package:fumi_click/features/usuario/profile/presentation/profile_screen.dart';
 import 'package:fumi_click/firebase_options.dart';
 import 'package:fumi_click/utils/material-theme/lib/theme.dart';
 import 'package:fumi_click/utils/material-theme/lib/util.dart';
@@ -24,7 +27,7 @@ class MainApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final brightness = View.of(context).platformDispatcher.platformBrightness;
-  final userWithRole = ref.watch(userWithRoleProvider);
+    final userWithRole = ref.watch(userWithRoleProvider);
 
     TextTheme textTheme = createTextTheme(context, "Inter", "Roboto Flex");
     MaterialTheme theme = MaterialTheme(textTheme);
@@ -44,9 +47,8 @@ class MainApp extends ConsumerWidget {
       return const LoginScreen();
     }
     if (state.role == 'tecnico') {
-      return const Scaffold(
-        body: Center(child: Text('Bienvenido técnico', style: TextStyle(fontSize: 24))),
-      );
+      // Pantalla exclusiva para técnico
+      return const TecnicoMainScreen();
     }
     // Usuario normal
     return HomeScreen(
@@ -58,5 +60,4 @@ class MainApp extends ConsumerWidget {
       ],
     );
   }
-  }
-
+}

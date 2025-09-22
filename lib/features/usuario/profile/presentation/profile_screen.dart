@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fumi_click/features/auth/provider/auth_notifier_provider.dart';
 import 'package:fumi_click/features/auth/provider/auth_provider.dart';
-import 'package:fumi_click/features/profile/presentation/user_not_found.dart';
-import 'package:fumi_click/features/profile/presentation/edit_profile_screen.dart';
-import 'package:fumi_click/features/profile/provider/user_profile_provider.dart';
+import 'package:fumi_click/features/usuario/profile/presentation/user_not_found.dart';
+import 'package:fumi_click/features/usuario/profile/presentation/edit_profile_screen.dart';
+import 'package:fumi_click/features/usuario/profile/provider/user_profile_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
