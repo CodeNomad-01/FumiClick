@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fumi_click/features/auth/provider/auth_notifier_provider.dart';
+import 'package:fumi_click/features/usuario/profile/data/user_profile.dart';
+import 'package:fumi_click/features/usuario/profile/provider/user_profile_provider.dart';
 import 'package:fumi_click/utils/validators.dart';
 
 class SignUpForm extends ConsumerStatefulWidget {
@@ -14,10 +16,11 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +42,48 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
               decoration: InputDecoration(
                 labelText: "Nombre",
                 hintText: "Ingresa tu nombre completo",
+                labelStyle: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                hintStyle: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: isTablet ? 20 : 16,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ----------------- Teléfono -----------------
+            TextFormField(
+              controller: _phoneController,
+              validator: notNullOrEmpty,
+              decoration: InputDecoration(
+                labelText: "Teléfono",
+                hintText: "Ingresa tu número de teléfono",
+                labelStyle: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                hintStyle: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: isTablet ? 20 : 16,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ----------------- Dirección -----------------
+            TextFormField(
+              controller: _addressController,
+              validator: notNullOrEmpty,
+              decoration: InputDecoration(
+                labelText: "Dirección",
+                hintText: "Ingresa tu dirección",
                 labelStyle: textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -142,14 +187,27 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                 ),
                 elevation: 3,
               ),
-              onPressed: () {
+              onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  ref
-                      .read(authNotifierProvider.notifier)
-                      .register(
-                        _emailController.text,
-                        _passwordController.text,
-                      );
+                  // Registrar usuario en Firebase Auth
+                  await ref.read(authNotifierProvider.notifier).register(
+                    _emailController.text,
+                    _passwordController.text,
+                  );
+
+                  // Guardar perfil en Firestore con los datos del formulario y rol 'usuario'
+                  final user = ref.read(authNotifierProvider.notifier).currentUser;
+                  if (user != null) {
+                    final profile = UserProfile(
+                      userId: user.uid,
+                      name: _nameController.text,
+                      phone: _phoneController.text,
+                      address: _addressController.text,
+                      role: 'usuario',
+                      email: _emailController.text,
+                    );
+                    await ref.read(saveUserProfileProvider(profile).future);
+                  }
                   Navigator.pop(context);
                 }
               },
@@ -169,6 +227,8 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   @override
   void dispose() {
     _nameController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();

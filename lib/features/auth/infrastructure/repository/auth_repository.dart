@@ -2,7 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
   Stream<User?> authStateChanges() => _auth.authStateChanges();
+
+  User? get currentUser => _auth.currentUser;
 
   Future<UserCredential> createUserWithEmailAndPassword(
     String email,

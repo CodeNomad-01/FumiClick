@@ -1,0 +1,126 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fumi_click/features/usuario/agenda/data/models/appointment.dart'
+    as agenda;
+import 'package:fumi_click/features/usuario/agenda/infrastructure/appointment_repository.dart'
+    as mem_repo;
+
+class ChatbotFirestoreRepository {
+  final FirebaseFirestore _db;
+  final FirebaseAuth _auth;
+
+  ChatbotFirestoreRepository({FirebaseFirestore? db, FirebaseAuth? auth})
+    : _db = db ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
+
+  Future<List<DateTime>> getAvailableSlots({int days = 30}) async {
+    final now = DateTime.now();
+    final end = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).add(Duration(days: days + 1));
+
+    final existingWithinRange =
+        await _db
+            .collection('appointments')
+            .where('slot', isGreaterThanOrEqualTo: Timestamp.fromDate(now))
+            .where('slot', isLessThan: Timestamp.fromDate(end))
+            .get();
+
+    final takenSlots =
+        existingWithinRange.docs
+            .map((d) => (d.data()['slot'] as Timestamp).toDate())
+            .map((dt) => DateTime(dt.year, dt.month, dt.day, dt.hour))
+            .toSet();
+
+    final candidateHours = [9, 11, 14, 16];
+    final slots = <DateTime>[];
+    for (int d = 0; d < days; d++) {
+      final day = DateTime(now.year, now.month, now.day).add(Duration(days: d));
+      for (var h in candidateHours) {
+        final slot = DateTime(day.year, day.month, day.day, h);
+        if (slot.isAfter(now)) {
+          if (!takenSlots.contains(slot)) slots.add(slot);
+        }
+      }
+    }
+
+    slots.sort();
+    return slots;
+  }
+
+  Future<agenda.Appointment> bookSlot(
+    DateTime slot, {
+    String? customerName,
+    String? pestType,
+    String? establishmentType,
+  }) async {
+  final normalized = DateTime(slot.year, slot.month, slot.day, slot.hour);
+
+    final collision = await _db
+        .collection('appointments')
+        .where('slot', isEqualTo: Timestamp.fromDate(normalized))
+        .limit(1)
+        .get();
+    if (collision.docs.isNotEmpty) {
+      throw Exception('Slot already booked');
+    }
+
+  final user = _auth.currentUser;
+  final userId = user?.uid;
+  final email = user?.email;
+  if (userId == null) {
+    throw Exception('Usuario no autenticado');
+  }
+
+  final inferredName = customerName ??
+    (user?.displayName != null && user!.displayName!.trim().isNotEmpty
+      ? user.displayName!
+      : (user?.email != null && user?.email!.isNotEmpty == true
+        ? user?.email!.split('@').first ?? 'Usuario'
+        : 'Usuario'));
+
+    // Leer perfil del usuario para contacto y dirección
+    String? contact;
+    String? address;
+    try {
+      final profileSnap = await _db.collection('users').doc(userId).get();
+      if (profileSnap.exists) {
+        final data = profileSnap.data() as Map<String, dynamic>;
+        final phone = (data['phone'] as String?)?.trim();
+        final addr = (data['address'] as String?)?.trim();
+  contact = (phone != null && phone.isNotEmpty) ? phone : (user?.email ?? '');
+        address = (addr != null && addr.isNotEmpty) ? addr : null;
+      } else {
+  contact = user?.email ?? '';
+        address = null;
+      }
+    } catch (_) {
+  contact = user?.email ?? '';
+      address = null;
+    }
+
+    final appointment = agenda.Appointment(
+      id: '',
+      slot: normalized,
+      customerName: inferredName,
+      contact: contact,
+      address: address,
+      pestType: pestType,
+      establishmentType: establishmentType,
+      status: 'proximo',
+    );
+
+    final data = appointment.toMap(userId: userId, email: email);
+    data['slot'] = Timestamp.fromDate(normalized);
+    data['createdAt'] = FieldValue.serverTimestamp();
+
+    final docRef = await _db.collection('appointments').add(data);
+
+    return appointment.copyWith(id: docRef.id);
+  }
+
+  static bool isSameSlot(DateTime a, DateTime b) =>
+      mem_repo.AppointmentRepository.isSameSlot(a, b);
+}
