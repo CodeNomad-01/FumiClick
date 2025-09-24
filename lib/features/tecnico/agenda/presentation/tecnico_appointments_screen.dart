@@ -20,7 +20,7 @@ class TecnicoAppointmentsScreen extends ConsumerWidget {
       body: citasAsync.when(
         data: (citas) {
           if (citas.isEmpty) {
-            return const Center(child: Text('No tienes citas programadas para hoy'));
+            return const Center(child: Text('No tienes citas programadas.'));
           }
           return ListView.builder(
             itemCount: citas.length,

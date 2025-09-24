@@ -13,7 +13,7 @@ class AppointmentHistoryScreen extends ConsumerWidget {
     final all = controller.booked;
     // Agrupar por status
     final pendientes = all
-        .where((a) =>  a.status.isEmpty || a.status == 'pendiente')
+        .where((a) =>  a.status.isEmpty || a.status == 'proximo')
         .toList()
       ..sort((a, b) => a.slot.compareTo(b.slot));
     final enProgreso = all
