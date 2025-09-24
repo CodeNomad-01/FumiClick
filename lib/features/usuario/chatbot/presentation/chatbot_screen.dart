@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../infrastructure/chatbot_controller.dart';
 import '../infrastructure/firestore_chatbot_repository.dart';
+import 'package:fumi_click/utils/whatsapp_util.dart';
+import 'package:fumi_click/config/app_config.dart';
 
 final chatbotControllerProvider = ChangeNotifierProvider<AgendaController>((
   ref,
@@ -63,6 +65,26 @@ class ChatbotScreen extends ConsumerWidget {
         title: const Text('ChatBot de Agenda'),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.chat),
+            onPressed: () async {
+              try {
+                await WhatsAppUtil.openWhatsAppSupport(
+                  phoneNumber: AppConfig.whatsappSupportNumber,
+                  defaultMessage: AppConfig.defaultMessages['chatbot']!,
+                );
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e')),
+                  );
+                }
+              }
+            },
+            tooltip: 'Contactar por WhatsApp',
+          ),
+        ],
       ),
       body: Column(
         children: [

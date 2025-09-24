@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fumi_click/utils/whatsapp_util.dart';
+import 'package:fumi_click/config/app_config.dart';
 
 class TecnicoHomeScreen extends StatelessWidget {
   final List<Widget> pages;
@@ -9,7 +11,27 @@ class TecnicoHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Inicio Técnico')),
+      appBar: AppBar(
+        title: const Text('Inicio Técnico'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.chat),
+            onPressed: () async {
+              try {
+                await WhatsAppUtil.openWhatsAppSupport(
+                  phoneNumber: AppConfig.whatsappSupportNumber,
+                  defaultMessage: AppConfig.defaultMessages['tecnico']!,
+                );
+              } catch (e) {
+                // Note: We can't use ScaffoldMessenger here since this is a StatelessWidget
+                // The error will be handled by the WhatsAppUtil itself
+                print('Error opening WhatsApp: $e');
+              }
+            },
+            tooltip: 'Contactar por WhatsApp',
+          ),
+        ],
+      ),
       body: pages[currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
