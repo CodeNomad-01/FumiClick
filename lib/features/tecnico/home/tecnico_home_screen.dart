@@ -6,7 +6,12 @@ class TecnicoHomeScreen extends StatelessWidget {
   final List<Widget> pages;
   final int currentIndex;
   final ValueChanged<int> onTap;
-  const TecnicoHomeScreen({Key? key, required this.pages, required this.currentIndex, required this.onTap}) : super(key: key);
+  const TecnicoHomeScreen({
+    Key? key,
+    required this.pages,
+    required this.currentIndex,
+    required this.onTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +20,7 @@ class TecnicoHomeScreen extends StatelessWidget {
         title: const Text('Inicio Técnico'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.chat),
+            icon: const Icon(Icons.message),
             onPressed: () async {
               try {
                 await WhatsAppUtil.openWhatsAppSupport(
@@ -37,14 +42,8 @@ class TecnicoHomeScreen extends StatelessWidget {
         currentIndex: currentIndex,
         onTap: onTap,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: 'Citas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Citas'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
         ],
       ),
     );

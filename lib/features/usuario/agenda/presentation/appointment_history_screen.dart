@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fumi_click/features/usuario/agenda/providers/agenda_controller.dart';
+import 'package:fumi_click/features/usuario/agenda/presentation/widgets/rating_widget.dart';
+import 'package:fumi_click/features/usuario/agenda/data/models/appointment.dart';
 
 class AppointmentHistoryScreen extends ConsumerWidget {
   const AppointmentHistoryScreen({super.key});
@@ -12,18 +14,15 @@ class AppointmentHistoryScreen extends ConsumerWidget {
 
     final all = controller.booked;
     // Agrupar por status
-    final pendientes = all
-        .where((a) =>  a.status.isEmpty || a.status == 'proximo')
-        .toList()
-      ..sort((a, b) => a.slot.compareTo(b.slot));
-    final enProgreso = all
-        .where((a) => a.status == 'en_progreso')
-        .toList()
-      ..sort((a, b) => a.slot.compareTo(b.slot));
-    final completadas = all
-        .where((a) => a.status == 'completada')
-        .toList()
-      ..sort((a, b) => b.slot.compareTo(a.slot));
+    final pendientes =
+        all.where((a) => a.status.isEmpty || a.status == 'proximo').toList()
+          ..sort((a, b) => a.slot.compareTo(b.slot));
+    final enProgreso =
+        all.where((a) => a.status == 'en_progreso').toList()
+          ..sort((a, b) => a.slot.compareTo(b.slot));
+    final completadas =
+        all.where((a) => a.status == 'completada').toList()
+          ..sort((a, b) => b.slot.compareTo(a.slot));
 
     return Scaffold(
       appBar: AppBar(
@@ -36,96 +35,104 @@ class AppointmentHistoryScreen extends ConsumerWidget {
           _Section(
             title: 'Pendientes',
             emptyText: pendientes.isEmpty ? 'No hay citas pendientes' : null,
-            children: pendientes
-                .map(
-                  (a) => _AppointmentTile(
-                    title: a.customerName ?? 'Sin nombre',
-                    subtitle: _buildSubtitle(
-                      a.address,
-                      a.contact,
-                      a.pestType,
-                      a.establishmentType,
-                    ),
-                    slot: a.slot,
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined),
-                          tooltip: 'Editar',
-                          onPressed: () => _openEditSheet(
-                            context,
-                            ref,
-                            a.id,
-                            name: a.customerName,
-                            contact: a.contact,
-                            address: a.address,
-                            pestType: a.pestType,
-                            establishmentType: a.establishmentType,
-                          ),
+            children:
+                pendientes
+                    .map(
+                      (a) => _AppointmentTile(
+                        title: a.customerName ?? 'Sin nombre',
+                        subtitle: _buildSubtitle(
+                          a.address,
+                          a.contact,
+                          a.pestType,
+                          a.establishmentType,
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.cancel_outlined),
-                          color: cs.error,
-                          tooltip: 'Cancelar cita',
-                          onPressed: () async {
-                            final confirmed = await _confirmCancel(
-                              context,
-                            );
-                            if (confirmed != true) return;
-                            await ref
-                                .read(agendaControllerProvider)
-                                .cancelAppointment(a.id);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Cita cancelada'),
-                                ),
-                              );
-                            }
-                          },
+                        slot: a.slot,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit_outlined),
+                              tooltip: 'Editar',
+                              onPressed:
+                                  () => _openEditSheet(
+                                    context,
+                                    ref,
+                                    a.id,
+                                    name: a.customerName,
+                                    contact: a.contact,
+                                    address: a.address,
+                                    pestType: a.pestType,
+                                    establishmentType: a.establishmentType,
+                                  ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.cancel_outlined),
+                              color: cs.error,
+                              tooltip: 'Cancelar cita',
+                              onPressed: () async {
+                                final confirmed = await _confirmCancel(context);
+                                if (confirmed != true) return;
+                                await ref
+                                    .read(agendaControllerProvider)
+                                    .cancelAppointment(a.id);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Cita cancelada'),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                )
-                .toList(),
+                      ),
+                    )
+                    .toList(),
           ),
           _Section(
             title: 'En progreso',
             emptyText: enProgreso.isEmpty ? 'No hay citas en progreso' : null,
-            children: enProgreso
-                .map(
-                  (a) => _AppointmentTile(
-                    title: a.customerName ?? 'Sin nombre',
-                    subtitle: _buildSubtitle(
-                      a.address,
-                      a.contact,
-                      a.pestType,
-                      a.establishmentType,
-                    ),
-                    slot: a.slot,
-                  ),
-                )
-                .toList(),
+            children:
+                enProgreso
+                    .map(
+                      (a) => _AppointmentTile(
+                        title: a.customerName ?? 'Sin nombre',
+                        subtitle: _buildSubtitle(
+                          a.address,
+                          a.contact,
+                          a.pestType,
+                          a.establishmentType,
+                        ),
+                        slot: a.slot,
+                      ),
+                    )
+                    .toList(),
           ),
           _Section(
             title: 'Completadas',
-            emptyText: completadas.isEmpty ? 'Aún no hay citas realizadas' : null,
-            children: completadas
-                .map(
-                  (a) => _AppointmentTile(
-                    title: a.customerName ?? 'Sin nombre',
-                    subtitle: _buildSubtitle(
-                      a.address,
-                      a.contact,
-                      a.pestType,
-                      a.establishmentType,
-                    ),
-                    slot: a.slot,
-                  ),
-                )
-                .toList(),
+            emptyText:
+                completadas.isEmpty ? 'Aún no hay citas realizadas' : null,
+            children:
+                completadas
+                    .map(
+                      (a) => _AppointmentTile(
+                        title: a.customerName ?? 'Sin nombre',
+                        subtitle: _buildSubtitle(
+                          a.address,
+                          a.contact,
+                          a.pestType,
+                          a.establishmentType,
+                        ),
+                        slot: a.slot,
+                        trailing: _buildCompletedAppointmentTrailing(
+                          context,
+                          ref,
+                          a,
+                        ),
+                      ),
+                    )
+                    .toList(),
           ),
           const SizedBox(height: 24),
         ],
@@ -240,6 +247,115 @@ class AppointmentHistoryScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildCompletedAppointmentTrailing(
+    BuildContext context,
+    WidgetRef ref,
+    Appointment appointment,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+
+    // Si ya tiene calificación, mostrar las estrellas
+    if (appointment.rating != null && appointment.rating! > 0) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          RatingWidget(
+            currentRating: appointment.rating,
+            interactive: false,
+            size: 16.0,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Calificado',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+          ),
+          if (appointment.comment != null && appointment.comment!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: IconButton(
+                icon: const Icon(Icons.comment_outlined, size: 16),
+                tooltip: 'Ver comentario',
+                onPressed:
+                    () => _showCommentDialog(context, appointment.comment!),
+              ),
+            ),
+        ],
+      );
+    }
+
+    // Si no tiene calificación, mostrar botón para calificar
+    return IconButton(
+      icon: const Icon(Icons.star_border),
+      tooltip: 'Calificar servicio',
+      onPressed: () => _showRatingDialog(context, ref, appointment),
+    );
+  }
+
+  Future<void> _showRatingDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Appointment appointment,
+  ) async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder:
+          (ctx) => RatingDialog(
+            title: 'Calificar Servicio',
+            appointmentTitle:
+                appointment.customerName ?? 'Servicio de Fumigación',
+            initialRating: appointment.rating,
+            initialComment: appointment.comment,
+          ),
+    );
+
+    if (result != null && context.mounted) {
+      try {
+        final rating = result['rating'] as int;
+        final comment = result['comment'] as String?;
+
+        await ref
+            .read(agendaControllerProvider)
+            .updateAppointmentRating(appointment.id, rating, comment: comment);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '¡Gracias por calificar el servicio con $rating estrella${rating > 1 ? 's' : ''}!',
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error al guardar reseña: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _showCommentDialog(BuildContext context, String comment) {
+    return showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Comentario'),
+            content: Text(comment),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cerrar'),
+              ),
+            ],
+          ),
     );
   }
 

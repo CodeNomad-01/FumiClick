@@ -22,12 +22,12 @@ class FirestoreAppointmentRepository {
     final user = _auth.currentUser;
     if (user == null) return;
 
-  _subscription ??=
-    _db
-      .collection('appointments')
-      .where('email', isEqualTo: user.email)
-      .orderBy('slot', descending: true)
-      .snapshots();
+    _subscription ??=
+        _db
+            .collection('appointments')
+            .where('email', isEqualTo: user.email)
+            .orderBy('slot', descending: true)
+            .snapshots();
 
     _subscription!.listen((snapshot) {
       _bookedCache
@@ -37,20 +37,20 @@ class FirestoreAppointmentRepository {
   }
 
   Stream<List<Appointment>> watchUserAppointments() {
-  final user = _auth.currentUser;
-  final email = user?.email;
-  if (email == null) return const Stream.empty();
-  return _db
-    .collection('appointments')
-    .where('email', isEqualTo: email)
-    .orderBy('slot', descending: true)
-    .snapshots()
-    .map(
-      (snap) =>
-        snap.docs
-          .map((d) => Appointment.fromMap(d.id, d.data()))
-          .toList(),
-    );
+    final user = _auth.currentUser;
+    final email = user?.email;
+    if (email == null) return const Stream.empty();
+    return _db
+        .collection('appointments')
+        .where('email', isEqualTo: email)
+        .orderBy('slot', descending: true)
+        .snapshots()
+        .map(
+          (snap) =>
+              snap.docs
+                  .map((d) => Appointment.fromMap(d.id, d.data()))
+                  .toList(),
+        );
   }
 
   Stream<void> watchAllAppointments() {
@@ -114,9 +114,10 @@ class FirestoreAppointmentRepository {
       throw Exception('Usuario no autenticado');
     }
 
-      final data = appointment.toMap(userId: userId, email: email);
-      data['pestType'] = appointment.pestType; // Ensure pestType is included
-      data['establishmentType'] = appointment.establishmentType; // Ensure establishmentType is included
+    final data = appointment.toMap(userId: userId, email: email);
+    data['pestType'] = appointment.pestType; // Ensure pestType is included
+    data['establishmentType'] =
+        appointment.establishmentType; // Ensure establishmentType is included
     data['slot'] = Timestamp.fromDate(slotNormalized);
     data['createdAt'] = FieldValue.serverTimestamp();
 
@@ -136,6 +137,8 @@ class FirestoreAppointmentRepository {
     String? address,
     String? pestType,
     String? establishmentType,
+    int? rating,
+    String? comment,
   }) async {
     final updates = <String, dynamic>{};
     if (customerName != null) updates['customerName'] = customerName;
@@ -144,6 +147,8 @@ class FirestoreAppointmentRepository {
     if (pestType != null) updates['pestType'] = pestType;
     if (establishmentType != null)
       updates['establishmentType'] = establishmentType;
+    if (rating != null) updates['rating'] = rating;
+    if (comment != null) updates['comment'] = comment;
     if (updates.isEmpty) return;
     await _db.collection('appointments').doc(appointmentId).update(updates);
     final idx = _bookedCache.indexWhere((a) => a.id == appointmentId);
@@ -155,6 +160,8 @@ class FirestoreAppointmentRepository {
         address: address,
         pestType: pestType,
         establishmentType: establishmentType,
+        rating: rating,
+        comment: comment,
       );
     }
   }

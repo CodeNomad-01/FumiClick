@@ -138,6 +138,8 @@ class AgendaController extends ChangeNotifier {
     String? address,
     String? pestType,
     String? establishmentType,
+    int? rating,
+    String? comment,
   }) async {
     await repository.updateAppointmentFields(
       appointmentId,
@@ -146,6 +148,21 @@ class AgendaController extends ChangeNotifier {
       address: address,
       pestType: pestType,
       establishmentType: establishmentType,
+      rating: rating,
+      comment: comment,
+    );
+    notifyListeners();
+  }
+
+  Future<void> updateAppointmentRating(
+    String appointmentId,
+    int rating, {
+    String? comment,
+  }) async {
+    await repository.updateAppointmentFields(
+      appointmentId,
+      rating: rating,
+      comment: comment,
     );
     notifyListeners();
   }
@@ -156,12 +173,12 @@ class AgendaController extends ChangeNotifier {
   }
 
   void reset() {
-  request.name = null;
-  request.contact = null;
-  request.address = null;
-  request.chosenSlot = null;
-  request.establishmentType = null;
-  request.pestType = null;
-  notifyListeners();
+    request.name = null;
+    request.contact = null;
+    request.address = null;
+    request.chosenSlot = null;
+    request.establishmentType = null;
+    request.pestType = null;
+    notifyListeners();
   }
 }

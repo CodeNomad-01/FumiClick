@@ -25,7 +25,7 @@ class AppointmentFormScreen extends ConsumerWidget {
             tooltip: 'Recargar franjas',
           ),
           IconButton(
-            icon: const Icon(Icons.chat),
+            icon: const Icon(Icons.message),
             onPressed: () async {
               try {
                 await WhatsAppUtil.openWhatsAppSupport(
@@ -34,9 +34,9 @@ class AppointmentFormScreen extends ConsumerWidget {
                 );
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Error: $e')));
                 }
               }
             },

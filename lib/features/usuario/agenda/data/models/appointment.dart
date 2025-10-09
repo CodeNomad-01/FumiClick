@@ -9,6 +9,8 @@ class Appointment {
   final String? pestType;
   final String? establishmentType;
   final String status;
+  final int? rating;
+  final String? comment;
 
   Appointment({
     required this.id,
@@ -19,6 +21,8 @@ class Appointment {
     this.pestType,
     this.establishmentType,
     this.status = 'proximo',
+    this.rating,
+    this.comment,
   });
 
   factory Appointment.fromMap(String id, Map<String, dynamic> map) {
@@ -38,6 +42,8 @@ class Appointment {
       pestType: map['pestType'] as String?,
       establishmentType: map['establishmentType'] as String?,
       status: map['estado'] as String? ?? 'proximo',
+      rating: map['rating'] as int?,
+      comment: map['comment'] as String?,
     );
   }
 
@@ -52,6 +58,8 @@ class Appointment {
       'pestType': pestType,
       'establishmentType': establishmentType,
       'status': status,
+      'rating': rating,
+      'comment': comment,
     };
   }
 
@@ -64,6 +72,8 @@ class Appointment {
     String? pestType,
     String? establishmentType,
     String? status,
+    int? rating,
+    String? comment,
   }) {
     return Appointment(
       id: id ?? this.id,
@@ -74,6 +84,8 @@ class Appointment {
       pestType: pestType ?? this.pestType,
       establishmentType: establishmentType ?? this.establishmentType,
       status: status ?? this.status,
+      rating: rating ?? this.rating,
+      comment: comment ?? this.comment,
     );
   }
 }
