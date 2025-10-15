@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:fumi_click/utils/whatsapp_util.dart';
-import 'package:fumi_click/config/app_config.dart';
 
-class TecnicoHomeScreen extends StatelessWidget {
+class AdminHomeScreen extends StatelessWidget {
   final List<Widget> pages;
   final int currentIndex;
   final ValueChanged<int> onTap;
-  const TecnicoHomeScreen({
+  const AdminHomeScreen({
     Key? key,
     required this.pages,
     required this.currentIndex,
@@ -22,6 +20,7 @@ class TecnicoHomeScreen extends StatelessWidget {
         onTap: onTap,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Citas'),
+          BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Técnicos'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
         ],
       ),

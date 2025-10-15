@@ -1,8 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fumi_click/features/tecnico/agenda/presentation/tecnico_appointments_screen.dart';
-import 'package:fumi_click/features/tecnico/home/tecnico_home_screen.dart';
+import 'package:fumi_click/features/admin/home/admin_main_screen.dart';
 import 'package:fumi_click/features/tecnico/home/tecnico_main_screen.dart';
 import 'package:fumi_click/features/usuario/agenda/presentation/appointment_form_screen.dart';
 import 'package:fumi_click/features/usuario/agenda/presentation/appointment_history_screen.dart';
@@ -43,12 +42,15 @@ class MainApp extends ConsumerWidget {
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
+
     if (state.firebaseUser == null) {
       return const LoginScreen();
     }
+
     if (state.role == 'tecnico') {
-      // Pantalla exclusiva para técnico
       return const TecnicoMainScreen();
+    }else if(state.role=='admin'){
+      return const AdminMainScreen();
     }
     // Usuario normal
     return HomeScreen(

@@ -1,96 +1,199 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../provider/tecnico_profile_provider.dart';
+import 'package:fumi_click/features/auth/provider/auth_notifier_provider.dart';
+import 'package:fumi_click/features/auth/provider/auth_provider.dart';
+import 'package:fumi_click/features/usuario/profile/presentation/user_not_found.dart';
+import 'package:fumi_click/features/usuario/profile/presentation/edit_profile_screen.dart';
+import 'package:fumi_click/features/usuario/profile/provider/user_profile_provider.dart';
 
-class TecnicoProfileScreen extends ConsumerWidget {
-  const TecnicoProfileScreen({Key? key}) : super(key: key);
+class TecnicoProfileScreen extends ConsumerStatefulWidget {
+  const TecnicoProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final profile = ref.watch(tecnicoProfileProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mi perfil'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-      ),
-      body: profile == null
-          ? Center(
-              child: Text(
-                'No autenticado',
-                style: TextStyle(color: colorScheme.error),
-              ),
-            )
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: colorScheme.primaryContainer,
-                      child: Icon(Icons.person, size: 48, color: colorScheme.onPrimaryContainer),
-                    ),
-                    const SizedBox(height: 24),
-                    Card(
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              profile.nombre,
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              profile.correo,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                            const SizedBox(height: 8),
-                            Chip(
-                              label: Text(profile.rol),
-                              backgroundColor: colorScheme.secondaryContainer,
-                              labelStyle: TextStyle(color: colorScheme.onSecondaryContainer),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    FilledButton.icon(
-                      onPressed: () async {
-                        await _signOut(context);
-                      },
-                      icon: const Icon(Icons.logout),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: colorScheme.error,
-                        foregroundColor: colorScheme.onError,
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-                        textStyle: const TextStyle(fontSize: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      label: const Text('Cerrar sesión'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-    );
+  ConsumerState<TecnicoProfileScreen> createState() => _TecnicoProfileScreenState();
+}
+
+class _TecnicoProfileScreenState extends ConsumerState<TecnicoProfileScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    super.dispose();
   }
 
-  Future<void> _signOut(BuildContext context) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    // Cierra la sesión en Firebase
-    try {
-      await FirebaseAuth.instance.signOut();
-    } catch (e) {
-      debugPrint('Error al cerrar sesión: $e');
-    }
+  @override
+  Widget build(BuildContext context) {
+    final userAsyncValue = ref.watch(userAuthProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return userAsyncValue.when(
+      data: (user) {
+        if (user == null) return const UserNotFound();
+
+        final profileByEmailAsync = ref.watch(
+          userProfileByEmailProvider(user.email ?? ''),
+        );
+
+        return profileByEmailAsync.when(
+          data: (profile) {
+            if (profile == null) return const UserNotFound();
+            _nameController.text = profile.name ?? (user.displayName ?? '');
+            _phoneController.text = profile.phone ?? '';
+            _addressController.text = profile.address ?? '';
+            final userRole = profile.role ?? 'usuario';
+
+            return Scaffold(
+              backgroundColor: colorScheme.surface,
+              appBar: AppBar(
+                title: const Text('Mi Perfil'),
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+              ),
+              body: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: colorScheme.surfaceContainerHigh,
+                          child: Icon(
+                            Icons.person,
+                            size: 60,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text('Datos personales', style: textTheme.titleMedium),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.verified_user, size: 20),
+                          const SizedBox(width: 8),
+                          Text('Rol: ', style: textTheme.bodyMedium),
+                          Text(
+                            userRole,
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          'Nombre',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        profile.name ?? '',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          'Correo electrónico',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        user.email ?? '',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          'Teléfono',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        profile.phone ?? '',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          'Dirección',
+                          style: textTheme.labelMedium?.copyWith(
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        profile.address ?? '',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
+                      FilledButton(
+                        onPressed: () {
+                          ref.read(authNotifierProvider.notifier).logout();
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: colorScheme.error,
+                          foregroundColor: colorScheme.onError,
+                        ),
+                        child: const Text('Cerrar sesión'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+          loading:
+              () => Center(
+                child: CircularProgressIndicator(color: colorScheme.primary),
+              ),
+          error:
+              (error, stack) => Center(
+                child: Text(
+                  'Error: $error',
+                  style: TextStyle(color: colorScheme.error),
+                ),
+              ),
+        );
+      },
+      error:
+          (error, stack) => Center(
+            child: Text(
+              'Error: $error',
+              style: TextStyle(color: colorScheme.error),
+            ),
+          ),
+      loading:
+          () => Center(
+            child: CircularProgressIndicator(color: colorScheme.primary),
+          ),
+    );
   }
 }
