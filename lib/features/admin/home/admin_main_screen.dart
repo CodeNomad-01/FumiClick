@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fumi_click/features/admin/agenda/presentation/tecnico_appointments_screen.dart';
+import 'package:fumi_click/features/admin/presentation/appointment_assignment_screen.dart';
 import 'package:fumi_click/features/admin/home/admin_home_screen.dart';
 import 'package:fumi_click/features/admin/profile/presentation/admin_profile_screen.dart';
 import 'package:fumi_click/features/admin/presentation/technical_account_manager_screen.dart';
@@ -15,7 +15,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    AdminAppointmentsScreen(),
+    AppointmentAssignmentScreen(),
     TechnicalAccountManagerScreen(),
     AdminProfileScreen(),
   ];

@@ -4,16 +4,19 @@ import 'package:fumi_click/features/tecnico/agenda/data/models/tecnico_appointme
 
 class FirestoreTecnicoAppointmentRepository {
   final FirebaseFirestore _db;
-  final FirebaseAuth _auth;
-
-  FirestoreTecnicoAppointmentRepository({FirebaseFirestore? db, FirebaseAuth? auth})
-      : _db = db ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  FirestoreTecnicoAppointmentRepository({FirebaseFirestore? db})
+      : _db = db ?? FirebaseFirestore.instance;
 
   /// Obtiene todas las citas en tiempo real
   Stream<List<TecnicoAppointment>> getCitas() {
+    final email = FirebaseAuth.instance.currentUser?.email;
+    if (email == null || email.isEmpty) {
+      // No authenticated user, return empty stream
+      return Stream.value(<TecnicoAppointment>[]);
+    }
     return _db
         .collection('appointments')
+        .where('technicianEmail', isEqualTo: email)
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) => TecnicoAppointment.fromMap(doc.data(), doc.id))

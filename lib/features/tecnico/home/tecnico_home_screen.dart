@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fumi_click/utils/whatsapp_util.dart';
-import 'package:fumi_click/config/app_config.dart';
 
 class TecnicoHomeScreen extends StatelessWidget {
   final List<Widget> pages;
